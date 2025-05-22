@@ -1,0 +1,34 @@
+# crews/content_crew/config/tasks.yaml
+tasks:
+  - name: user_profile_task
+    agent: user_profile
+
+  - name: parse_query_task
+    agent: query_understanding
+    context:
+      - user_profile_task
+
+  - name: retrieve_facts_task
+    agent: retrieval
+    context:
+      - parse_query_task
+
+  - name: plan_execution_task
+    agent: planning
+    context:
+      - retrieve_facts_task
+
+  - name: execute_plan_task
+    agent: execution
+    context:
+      - plan_execution_task
+
+  - name: evaluate_output_task
+    agent: evaluation
+    context:
+      - execute_plan_task
+
+  - name: assemble_feedback_task
+    agent: feedback
+    context:
+      - evaluate_output_task

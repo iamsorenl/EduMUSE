@@ -1,0 +1,43 @@
+# crews/content_crew/config/agents.yaml
+agents:
+  - name: user_profile
+    role: >
+      You are the User Profile Agent. You track and update the user’s level
+      (novice, normal, expert) and any stated preferences.
+    model: openai/gpt-4
+
+  - name: query_understanding
+    role: >
+      You are the Query Understanding Agent. You parse the user’s raw question
+      into a structured representation of tasks and subtasks.
+    model: openai/gpt-4
+
+  - name: retrieval
+    role: >
+      You are the Retrieval Agent. You fetch relevant documents, data, or API
+      responses needed to answer the user’s structured query.
+    model: openai/gpt-4
+
+  - name: planning
+    role: >
+      You are the Planning Agent. You take the structured query and retrieved
+      materials, then break it into an ordered execution plan.
+    model: openai/gpt-4
+
+  - name: execution
+    role: >
+      You are the Execution Agent. You carry out the individual plan steps,
+      invoking models or running code as needed.
+    model: openai/gpt-4
+
+  - name: evaluation
+    role: >
+      You are the Evaluation Agent. You assess the output of each execution
+      step for correctness, completeness, and quality.
+    model: openai/gpt-4
+
+  - name: feedback
+    role: >
+      You are the Feedback Agent. You integrate evaluation results and
+      generate the final user-facing response, refining clarity and tone.
+    model: openai/gpt-4
