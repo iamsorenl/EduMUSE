@@ -6,11 +6,18 @@ import {
   Card,
   CardContent,
   Chip,
-  Divider
+  Divider,
+  Button,
+  IconButton,
+  Stack,
+  Collapse
 } from '@mui/material';
-import { Psychology, CheckCircle } from '@mui/icons-material';
+import { Psychology, CheckCircle, Clear, Close, DeleteOutline, ExpandMore, ExpandLess, HighlightOff } from '@mui/icons-material';
 
-export default function ResultsPanel({ results, isLoading, selectedText, highlights }) {
+// Individual Result Card Component
+const ResultCard = ({ result, onDelete, index }) => {
+  const [expanded, setExpanded] = React.useState(index === 0); // First result expanded by default
+
   const getActionColor = (action) => {
     switch (action) {
       case 'summarize': return 'primary';
@@ -34,16 +41,130 @@ export default function ResultsPanel({ results, isLoading, selectedText, highlig
   };
 
   return (
-    <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
-      <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-        <Psychology sx={{ mr: 1, color: 'primary.main' }} />
-        <Typography variant="h6">
-          AI Results
+    <Card sx={{ mb: 1, border: '1px solid', borderColor: 'divider' }}>
+      <CardContent sx={{ pb: 1 }}>
+        {/* Header with action and controls */}
+        <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
+          <Typography variant="body1" sx={{ mr: 1 }}>
+            {getActionIcon(result.action)}
+          </Typography>
+          <Chip 
+            label={result.action} 
+            color={getActionColor(result.action)}
+            size="small"
+          />
+          <CheckCircle 
+            sx={{ ml: 'auto', mr: 1, color: 'success.main', fontSize: 18 }} 
+          />
+          <IconButton 
+            size="small" 
+            onClick={() => setExpanded(!expanded)}
+            sx={{ mr: 1 }}
+          >
+            {expanded ? <ExpandLess /> : <ExpandMore />}
+          </IconButton>
+          <IconButton 
+            size="small" 
+            onClick={() => onDelete(result.id)}
+            color="error"
+            title="Delete this result"
+          >
+            <DeleteOutline fontSize="small" />
+          </IconButton>
+        </Box>
+
+        {/* Timestamp */}
+        <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 1 }}>
+          {new Date(result.timestamp).toLocaleTimeString()}
         </Typography>
+
+        {/* Collapsible content */}
+        <Collapse in={expanded}>
+          <Box>
+            {/* Selected Text Preview */}
+            <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+              Selected Text:
+            </Typography>
+            <Box sx={{ 
+              backgroundColor: 'grey.100', 
+              p: 1, 
+              borderRadius: 1,
+              mb: 1,
+              fontStyle: 'italic'
+            }}>
+              <Typography variant="body2" sx={{ fontSize: '0.85rem' }}>
+                "{result.text}"
+              </Typography>
+            </Box>
+            
+            {/* AI Result */}
+            <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+              AI Result:
+            </Typography>
+            <Box sx={{ 
+              backgroundColor: 'grey.50', 
+              p: 1.5, 
+              borderRadius: 1,
+              maxHeight: 200,
+              overflow: 'auto'
+            }}>
+              <Typography variant="body2" sx={{ fontSize: '0.85rem' }}>
+                {result.error ? 
+                  `Error: ${result.error}` : 
+                  (typeof result.data === 'string' ? result.data : JSON.stringify(result.data, null, 2))
+                }
+              </Typography>
+            </Box>
+          </Box>
+        </Collapse>
+      </CardContent>
+    </Card>
+  );
+};
+
+export default function ResultsPanel({ 
+  results, 
+  isLoading, 
+  selectedText, 
+  highlights, 
+  onClearAllResults, 
+  onDeleteResult,
+  onClearHighlights // NEW: Add prop for clearing highlights
+}) {
+
+  return (
+    <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
+      {/* Header */}
+      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
+        <Box sx={{ display: 'flex', alignItems: 'center' }}>
+          <Psychology sx={{ mr: 1, color: 'primary.main' }} />
+          <Typography variant="h6">
+            AI Results
+            {results && results.length > 0 && (
+              <Typography component="span" variant="body2" color="text.secondary" sx={{ ml: 1 }}>
+                ({results.length})
+              </Typography>
+            )}
+          </Typography>
+        </Box>
+        
+        {/* Clear AI Results Button - only show when there are results */}
+        {results && results.length > 0 && !isLoading && onClearAllResults && (
+          <IconButton 
+            onClick={onClearAllResults}
+            size="small"
+            color="error"
+            title="Clear AI Results Only"
+            sx={{ ml: 1 }}
+          >
+            <Clear />
+          </IconButton>
+        )}
       </Box>
       
       <Divider sx={{ mb: 2 }} />
       
+      {/* Loading state */}
       {isLoading && (
         <Box sx={{ 
           display: 'flex', 
@@ -64,93 +185,102 @@ export default function ResultsPanel({ results, isLoading, selectedText, highlig
         </Box>
       )}
       
-      {results && !isLoading && (
-        <Card sx={{ mb: 2 }}>
-          <CardContent>
-            <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-              <Typography variant="body1" sx={{ mr: 1 }}>
-                {getActionIcon(results.action)}
-              </Typography>
-              <Chip 
-                label={results.action} 
-                color={getActionColor(results.action)}
-                size="small"
+      {/* Results list */}
+      {results && results.length > 0 && (
+        <Box sx={{ flex: 1, overflow: 'auto', mb: 2 }}>
+          <Stack spacing={1}>
+            {results.map((result, index) => (
+              <ResultCard 
+                key={result.id} 
+                result={result} 
+                onDelete={onDeleteResult}
+                index={index}
               />
-              <CheckCircle 
-                sx={{ ml: 'auto', color: 'success.main', fontSize: 20 }} 
-              />
-            </Box>
-            
-            <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-              Selected Text:
-            </Typography>
-            <Box sx={{ 
-              backgroundColor: 'grey.100', 
-              p: 1, 
-              borderRadius: 1,
-              mb: 2,
-              fontStyle: 'italic'
-            }}>
-              <Typography variant="body2">
-                "{results.text || selectedText}"
-              </Typography>
-            </Box>
-            
-            <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-              AI Result:
-            </Typography>
-            
-            <Box sx={{ 
-              backgroundColor: 'grey.50', 
-              p: 2, 
-              borderRadius: 1,
-              maxHeight: 300,
-              overflow: 'auto'
-            }}>
-              <Typography variant="body2">
-                {results.error ? 
-                  `Error: ${results.error}` : 
-                  (typeof results.data === 'string' ? results.data : JSON.stringify(results.data, null, 2))
-                }
-              </Typography>
-            </Box>
-            
-            {results.timestamp && (
-              <Typography variant="caption" color="text.secondary" sx={{ mt: 1, display: 'block' }}>
-                Processed at: {new Date(results.timestamp).toLocaleTimeString()}
-              </Typography>
-            )}
-          </CardContent>
-        </Card>
+            ))}
+          </Stack>
+          
+          {/* Clear AI Results button at bottom */}
+          {onClearAllResults && (
+            <Button 
+              variant="outlined" 
+              startIcon={<Clear />}
+              onClick={onClearAllResults}
+              sx={{ mt: 2, width: '100%' }}
+              color="error"
+              size="small"
+            >
+              Clear AI Results ({results.length})
+            </Button>
+          )}
+        </Box>
       )}
 
-      {/* Show highlight summary */}
+      {/* Divider between AI Results and Document Highlights */}
+      {((results && results.length > 0) || (highlights && highlights.length > 0)) && (
+        <Divider sx={{ my: 1 }} />
+      )}
+
+      {/* Document Highlights section - UPDATED with separate clear */}
       {highlights && highlights.length > 0 && (
         <Box sx={{ mt: 1 }}>
-          <Typography variant="subtitle2" sx={{ mb: 1 }}>
-            Document Highlights ({highlights.length})
-          </Typography>
-          <Box sx={{ maxHeight: 200, overflow: 'auto' }}>
-            {highlights.slice(0, 5).map((highlight, index) => (
+          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 1 }}>
+            <Typography variant="subtitle2" sx={{ color: 'text.primary' }}>
+              📄 Document Highlights ({highlights.length})
+            </Typography>
+            {/* Clear Highlights Button - NEW */}
+            {onClearHighlights && (
+              <IconButton 
+                onClick={onClearHighlights}
+                size="small"
+                color="warning"
+                title="Clear All Highlights"
+                sx={{ ml: 1 }}
+              >
+                <HighlightOff fontSize="small" />
+              </IconButton>
+            )}
+          </Box>
+          
+          <Box sx={{ maxHeight: 150, overflow: 'auto' }}>
+            {highlights.slice(0, 3).map((highlight, index) => (
               <Box key={highlight.id || index} sx={{ mb: 1, p: 1, backgroundColor: 'action.hover', borderRadius: 1 }}>
                 <Typography variant="caption">
                   {highlight.comment?.emoji || '🎯'} {highlight.comment?.text || 'highlight'}
                 </Typography>
                 <Typography variant="body2" sx={{ fontSize: '0.75rem' }}>
-                  "{highlight.content?.text?.substring(0, 60) || 'No text'}..."
+                  "{highlight.content?.text?.substring(0, 40) || 'No text'}..."
                 </Typography>
               </Box>
             ))}
-            {highlights.length > 5 && (
+            {highlights.length > 3 && (
               <Typography variant="caption" color="text.secondary">
-                +{highlights.length - 5} more highlights
+                +{highlights.length - 3} more highlights
               </Typography>
             )}
           </Box>
+          
+          {/* Clear Highlights button at bottom - Alternative placement */}
+          {onClearHighlights && (
+            <Button 
+              variant="text" 
+              startIcon={<HighlightOff />}
+              onClick={onClearHighlights}
+              sx={{ mt: 1, width: '100%' }}
+              color="warning"
+              size="small"
+            >
+              Clear Document Highlights ({highlights.length})
+            </Button>
+          )}
+          
+          <Typography variant="caption" color="text.secondary" sx={{ fontStyle: 'italic', display: 'block', mt: 1 }}>
+            * Highlights are managed separately from AI results
+          </Typography>
         </Box>
       )}
 
-      {selectedText && !results && !isLoading && (
+      {/* Currently selected text */}
+      {selectedText && results.length === 0 && !isLoading && (
         <Box sx={{ mt: 'auto', p: 2, backgroundColor: 'action.hover', borderRadius: 1 }}>
           <Typography variant="caption" color="text.secondary">
             Currently selected:
@@ -161,7 +291,8 @@ export default function ResultsPanel({ results, isLoading, selectedText, highlig
         </Box>
       )}
       
-      {!results && !isLoading && !selectedText && (
+      {/* Empty state */}
+      {results.length === 0 && !isLoading && !selectedText && (
         <Box sx={{ 
           textAlign: 'center', 
           py: 4,

@@ -32,8 +32,8 @@ function App() {
   const [selectedText, setSelectedText] = useState('');
   // State to manage highlights in the PDF viewer
   const [highlights, setHighlights] = useState([]);
-  // State to manage results from actions
-  const [results, setResults] = useState(null);
+  // State to manage results from actions - CHANGED to array for multiple results
+  const [results, setResults] = useState([]);
   // State to manage loading status
   const [isLoading, setIsLoading] = useState(false);
 
@@ -41,7 +41,7 @@ function App() {
   const handleFileSelect = (file) => {
     setSelectedFile(file); // Update the selected file
     setHighlights([]); // Clear highlights when a new file is selected
-    setResults(null); // Clear results
+    setResults([]); // Clear all results
     setSelectedText(''); // Clear selected text
   };
 
@@ -54,6 +54,24 @@ function App() {
   // Handler for adding a highlight in the PDF viewer
   const handleHighlight = (highlight) => {
     setHighlights(prev => [...prev, highlight]); // Add the new highlight to the list
+  };
+
+  // Handler for clearing ALL AI results
+  const handleClearAllResults = () => {
+    setResults([]);
+    console.log('All AI results cleared');
+  };
+
+  // Handler for clearing ALL highlights - NEW
+  const handleClearHighlights = () => {
+    setHighlights([]);
+    console.log('All highlights cleared');
+  };
+
+  // Handler for deleting individual AI result
+  const handleDeleteResult = (resultId) => {
+    setResults(prev => prev.filter(result => result.id !== resultId));
+    console.log('Individual AI result deleted:', resultId);
   };
 
   // Updated handler for performing an action - now accepts text parameter
@@ -78,10 +96,14 @@ function App() {
     try {
       console.log(`Performing ${action} on text:`, textToProcess.substring(0, 100));
       
+      // Generate unique ID for this result
+      const resultId = `result-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+      
       // Simulate an API call with a timeout (mock results for now)
       const response = await new Promise((resolve) => {
         setTimeout(() => {
           resolve({
+            id: resultId, // Add unique ID
             action,
             text: textToProcess.substring(0, 100) + (textToProcess.length > 100 ? '...' : ''),
             data: `Mock ${action} result for: "${textToProcess.substring(0, 50)}${textToProcess.length > 50 ? '...' : ''}"`,
@@ -91,17 +113,20 @@ function App() {
         }, 2000);
       });
 
-      setResults(response);
+      // Add to results array instead of replacing
+      setResults(prev => [response, ...prev]); // Add newest first
       setSelectedText(textToProcess); // Update selected text to show what was processed
       
     } catch (error) {
       console.error('Error calling API:', error); // Log any errors
-      setResults({
+      const errorResult = {
+        id: `error-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
         action,
         text: textToProcess.substring(0, 100) + (textToProcess.length > 100 ? '...' : ''),
         error: 'Failed to process request',
         timestamp: new Date().toISOString(),
-      });
+      };
+      setResults(prev => [errorResult, ...prev]);
     } finally {
       setIsLoading(false); // Set loading state to false
     }
@@ -143,10 +168,13 @@ function App() {
             <Grid size={3}>
               <Paper sx={{ height: '100%', p: 2 }}> {/* Paper component for styling */}
                 <ResultsPanel 
-                  results={results} // Pass results data
+                  results={results} // Pass results array
                   isLoading={isLoading} // Pass loading state
                   selectedText={selectedText} // Pass currently selected text
                   highlights={highlights} // Pass highlights for display
+                  onClearAllResults={handleClearAllResults} // Pass clear all results handler
+                  onDeleteResult={handleDeleteResult} // Pass delete individual result handler
+                  onClearHighlights={handleClearHighlights} // Pass clear highlights handler - NEW
                 />
               </Paper>
             </Grid>
