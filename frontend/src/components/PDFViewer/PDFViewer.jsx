@@ -10,9 +10,10 @@ export default function PDFViewer({
 }) {
   const [selectedText, setSelectedText] = useState('');
 
-  // Handle text selection from the PDF viewer
+  // Handle text selection from the PDF viewer - simplified to avoid duplication
   const handleTextSelection = (text) => {
     setSelectedText(text);
+    // Pass directly to parent without additional processing
     onTextSelection && onTextSelection(text);
   };
 
@@ -24,22 +25,22 @@ export default function PDFViewer({
 
   return (
     <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
-      {/* PDF Viewer */}
-      <Box sx={{ flex: 1, mb: 2 }}>
+      {/* PDF Viewer - this handles the actual text selection */}
+      <Box sx={{ flex: 1 }}>
         <DirectPDFViewer 
           file={file} 
           onTextSelection={handleTextSelection}
         />
       </Box>
 
-      {/* Selected Text Display */}
+      {/* Action buttons - only show when text is selected */}
       {selectedText && (
-        <Paper sx={{ p: 2, mb: 2 }}>
+        <Paper sx={{ p: 2, mt: 2 }}>
           <Typography variant="subtitle2" gutterBottom>
             Selected Text:
           </Typography>
-          <Typography variant="body2" sx={{ mb: 2 }}>
-            "{selectedText}"
+          <Typography variant="body2" sx={{ mb: 2, fontStyle: 'italic' }}>
+            "{selectedText.length > 100 ? selectedText.substring(0, 100) + '...' : selectedText}"
           </Typography>
           
           <Box sx={{ display: 'flex', gap: 1 }}>
@@ -67,16 +68,17 @@ export default function PDFViewer({
             >
               Ask Question
             </Button>
+            <Button 
+              variant="text" 
+              size="small"
+              onClick={() => setSelectedText('')}
+              color="secondary"
+            >
+              Clear
+            </Button>
           </Box>
         </Paper>
       )}
-
-      {/* Instructions */}
-      <Paper sx={{ p: 2, backgroundColor: '#f8f9fa' }}>
-        <Typography variant="body2" color="text.secondary">
-          💡 Highlight text directly in the PDF above to select it
-        </Typography>
-      </Paper>
     </Box>
   );
 }
