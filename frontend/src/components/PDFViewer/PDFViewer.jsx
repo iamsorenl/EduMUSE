@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Box, Typography, Paper, Button } from '@mui/material';
-import DirectPDFViewer from './DirectPDFViewer';
+import SimplePDFViewer from './SimplePDFViewer';
 
 export default function PDFViewer({ 
   file, 
@@ -26,7 +26,7 @@ export default function PDFViewer({
     <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
       {/* PDF Viewer */}
       <Box sx={{ flex: 1, mb: 2 }}>
-        <DirectPDFViewer 
+        <SimplePDFViewer 
           file={file} 
           onTextSelection={handleTextSelection}
         />
@@ -39,7 +39,7 @@ export default function PDFViewer({
             Selected Text:
           </Typography>
           <Typography variant="body2" sx={{ mb: 2 }}>
-            "{selectedText}"
+            {selectedText}
           </Typography>
           
           <Box sx={{ display: 'flex', gap: 1 }}>
@@ -74,7 +74,7 @@ export default function PDFViewer({
       {/* Instructions */}
       <Paper sx={{ p: 2, backgroundColor: '#f8f9fa' }}>
         <Typography variant="body2" color="text.secondary">
-          💡 Highlight text directly in the PDF above to select it
+          💡 To select text: highlight text in the PDF above, then use the action buttons
         </Typography>
       </Paper>
     </Box>
