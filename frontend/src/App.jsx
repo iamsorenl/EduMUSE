@@ -58,8 +58,16 @@ function App() {
   const handleAction = async (action) => {
     if (!selectedText) return; // Do nothing if no text is selected
 
+    // If it's just a highlight action, don't process with AI
+    if (action === 'highlight') {
+      console.log('Text highlighted:', selectedText);
+      return; // Just keep the highlight, no AI processing
+    }
+
     setIsLoading(true); // Set loading state to true
     try {
+      console.log(`Performing ${action} on text:`, selectedText.substring(0, 100));
+      
       // Simulate an API call with a timeout (mock results for now)
       setTimeout(() => {
         setResults({ 

@@ -1,48 +1,188 @@
-import React, { useRef, useEffect, useState, useCallback, useMemo } from 'react';
-import { Document, Page, pdfjs } from 'react-pdf';
-import { Box, Typography, Button, Paper, TextField, CircularProgress, Alert } from '@mui/material';
+import React, { useCallback } from 'react';
+import {
+  AreaHighlight,
+  Highlight,
+  PdfHighlighter,
+  PdfLoader,
+  Popup,
+  Tip,
+} from 'react-pdf-highlighter';
+import { Box, Typography, Button, ButtonGroup, Paper, Chip } from '@mui/material';
+import { Summarize, Quiz, Search, Psychology, Delete, Highlight as HighlightIcon } from '@mui/icons-material';
 
-// Remove worker setting entirely - let react-pdf use its fallback
-// pdfjs.GlobalWorkerOptions.workerSrc = null;
-
-export default function DirectPDFViewer({ file, onTextSelection }) {
-  const iframeRef = useRef(null);
-  const [numPages, setNumPages] = useState(null);
-  const [pageNumber, setPageNumber] = useState(1);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
-  const [manualText, setManualText] = useState('');
-  const [showManualInput, setShowManualInput] = useState(false);
-
-  const onDocumentLoadSuccess = useCallback(({ numPages }) => {
-    setNumPages(numPages);
-    setLoading(false);
-    setError(null);
-    console.log('PDF loaded successfully:', numPages, 'pages');
-  }, []);
-
-  const onDocumentLoadError = useCallback((error) => {
-    console.error('PDF load error:', error);
-    setError('Failed to load PDF');
-    setLoading(false);
-  }, []);
-
-  const handleTextSelection = useCallback(() => {
-    const selection = window.getSelection();
-    const text = selection.toString().trim();
+// CrewAI Action Tip Component (with Highlight option)
+const CrewAITip = ({ onConfirm, onCancel }) => (
+  <Paper sx={{ p: 2, maxWidth: 300, boxShadow: 3, borderRadius: 2 }}>
+    <Typography variant="subtitle2" gutterBottom color="primary">
+      Choose an action:
+    </Typography>
     
-    if (text && text.length > 0) {
-      console.log('Selected text:', text);
-      onTextSelection && onTextSelection(text);
-    }
-  }, [onTextSelection]);
+    <ButtonGroup 
+      variant="contained" 
+      size="small" 
+      orientation="vertical" 
+      fullWidth
+      sx={{ mb: 2 }}
+    >
+      <Button
+        startIcon={<HighlightIcon />}
+        onClick={() => onConfirm({ text: 'highlight', emoji: '💡' })}
+        color="warning"
+      >
+        Just Highlight
+      </Button>
+      <Button
+        startIcon={<Summarize />}
+        onClick={() => onConfirm({ text: 'summarize', emoji: '📝' })}
+        color="primary"
+      >
+        Summarize Text
+      </Button>
+      <Button
+        startIcon={<Psychology />}
+        onClick={() => onConfirm({ text: 'explain', emoji: '🧠' })}
+        color="success"
+      >
+        Explain Concept
+      </Button>
+      <Button
+        startIcon={<Quiz />}
+        onClick={() => onConfirm({ text: 'quiz', emoji: '❓' })}
+        color="secondary"
+      >
+        Generate Quiz
+      </Button>
+      <Button
+        startIcon={<Search />}
+        onClick={() => onConfirm({ text: 'analyze', emoji: '🔍' })}
+        color="info"
+      >
+        Deep Analysis
+      </Button>
+    </ButtonGroup>
 
-  // Options that force polyfill mode
-  const documentOptions = useMemo(() => ({
-    verbosity: 0,
-    disableWorker: true,
-    isEvalSupported: false
-  }), []);
+    <Button 
+      variant="outlined" 
+      size="small" 
+      fullWidth
+      onClick={onCancel}
+    >
+      Cancel
+    </Button>
+  </Paper>
+);
+
+// Highlight Popup Component (shows when clicking existing highlights)
+const HighlightPopup = ({ comment, onAction, onDelete }) => (
+  <Paper sx={{ p: 2, maxWidth: 250, boxShadow: 3, borderRadius: 2 }}>
+    {comment?.text && (
+      <>
+        <Typography variant="body2" gutterBottom>
+          {comment.emoji} Action: <Chip label={comment.text} size="small" />
+        </Typography>
+        <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 2 }}>
+          Choose a new action for this highlight:
+        </Typography>
+      </>
+    )}
+    
+    <ButtonGroup variant="outlined" size="small" orientation="vertical" fullWidth>
+      <Button onClick={() => onAction('highlight')}>💡 Keep Highlighted</Button>
+      <Button onClick={() => onAction('summarize')}>📝 Summarize</Button>
+      <Button onClick={() => onAction('explain')}>🧠 Explain</Button>
+      <Button onClick={() => onAction('quiz')}>❓ Quiz</Button>
+      <Button onClick={() => onAction('analyze')}>🔍 Analyze</Button>
+    </ButtonGroup>
+    
+    {onDelete && (
+      <Button 
+        variant="text" 
+        size="small" 
+        fullWidth
+        onClick={onDelete}
+        startIcon={<Delete />}
+        sx={{ mt: 1, color: 'error.main' }}
+      >
+        Delete Highlight
+      </Button>
+    )}
+  </Paper>
+);
+
+// Simple Spinner component
+const Spinner = () => (
+  <Box sx={{ 
+    display: 'flex', 
+    alignItems: 'center', 
+    justifyContent: 'center', 
+    height: '100%',
+    flexDirection: 'column'
+  }}>
+    <Typography variant="h6" sx={{ mb: 2 }}>Loading PDF...</Typography>
+    <Typography variant="body2" color="text.secondary">
+      Please wait while the document loads
+    </Typography>
+  </Box>
+);
+
+export default function DirectPDFViewer({
+  file,
+  highlights,
+  onAddHighlight,
+  onUpdateHighlight,
+  onResetHighlights,
+  onAction,
+  isLoading,
+  scrollViewerTo,
+  resetHash
+}) {
+
+  // Handle action confirmation from tip
+  const handleActionConfirm = useCallback((comment, highlight) => {
+    // Always add the highlight (visual highlighting)
+    onAddHighlight({
+      content: highlight.content,
+      position: highlight.position,
+      comment
+    });
+
+    // Only trigger CrewAI processing for non-highlight actions
+    if (comment.text !== 'highlight') {
+      onAction(comment.text, highlight.content.text);
+    } else {
+      // For highlight action, just update the selected text in parent
+      onAction('highlight', highlight.content.text);
+    }
+  }, [onAddHighlight, onAction]);
+
+  // Handle actions from existing highlights
+  const handleExistingHighlightAction = useCallback((action, highlight) => {
+    // Update the highlight's comment to reflect the new action
+    const updatedComment = {
+      text: action,
+      emoji: getActionEmoji(action)
+    };
+    
+    // Update the highlight
+    onUpdateHighlight(highlight.id, {}, { comment: updatedComment });
+    
+    // Trigger action if not just highlighting
+    if (action !== 'highlight') {
+      onAction(action, highlight.content.text);
+    }
+  }, [onAction, onUpdateHighlight]);
+
+  // Helper function to get emoji for actions
+  const getActionEmoji = (action) => {
+    switch (action) {
+      case 'highlight': return '💡';
+      case 'summarize': return '📝';
+      case 'explain': return '🧠';
+      case 'quiz': return '❓';
+      case 'analyze': return '🔍';
+      default: return '🎯';
+    }
+  };
 
   if (!file) {
     return (
@@ -64,75 +204,154 @@ export default function DirectPDFViewer({ file, onTextSelection }) {
 
   const pdfUrl = `http://127.0.0.1:5000/files/${file.filename}`;
 
-  const handleManualSubmit = () => {
-    if (manualText.trim()) {
-      onTextSelection(manualText.trim());
-      setManualText('');
-    }
-  };
-
   return (
     <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
-      {/* PDF Iframe */}
-      <Box sx={{ flex: 1, mb: 2 }}>
-        <iframe
-          ref={iframeRef}
-          src={pdfUrl}
-          width="100%"
-          height="100%"
-          style={{ border: '1px solid #ddd', borderRadius: '4px' }}
-          title={`PDF Viewer - ${file.filename}`}
-        />
+      {/* Highlights summary */}
+      {highlights.length > 0 && (
+        <Paper sx={{ p: 1, mb: 1, backgroundColor: 'action.hover' }}>
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <Typography variant="caption">
+              {highlights.length} highlight{highlights.length !== 1 ? 's' : ''} 
+              ({highlights.filter(h => h.comment?.text === 'highlight').length} saved, {highlights.filter(h => h.comment?.text !== 'highlight').length} processed)
+            </Typography>
+            <Button 
+              size="small" 
+              variant="outlined" 
+              onClick={onResetHighlights}
+              startIcon={<Delete />}
+            >
+              Clear All
+            </Button>
+          </Box>
+          
+          <Box sx={{ display: 'flex', gap: 0.5, flexWrap: 'wrap', mt: 0.5 }}>
+            {highlights.slice(0, 4).map((h, index) => (
+              <Chip 
+                key={h.id || index} 
+                label={`${h.comment?.emoji || '🎯'} "${h.content?.text?.substring(0, 15) || 'Highlight'}..."`}
+                size="small"
+                variant="outlined"
+                clickable
+                color={h.comment?.text === 'highlight' ? 'warning' : 'primary'}
+                onClick={() => {
+                  document.location.hash = `highlight-${h.id}`;
+                }}
+              />
+            ))}
+            {highlights.length > 4 && (
+              <Chip 
+                label={`+${highlights.length - 4} more`}
+                size="small"
+                variant="outlined"
+              />
+            )}
+          </Box>
+        </Paper>
+      )}
+
+      {/* PDF Highlighter (following the example pattern exactly) */}
+      <Box sx={{ flex: 1, position: 'relative' }}>
+        <PdfLoader url={pdfUrl} beforeLoad={<Spinner />}>
+          {(pdfDocument) => (
+            <PdfHighlighter
+              pdfDocument={pdfDocument}
+              enableAreaSelection={(event) => event.altKey}
+              onScrollChange={resetHash}
+              scrollRef={(scrollTo) => {
+                scrollViewerTo.current = scrollTo;
+                // Auto-scroll to hash on load
+                const highlightId = document.location.hash.slice("#highlight-".length);
+                if (highlightId) {
+                  const highlight = highlights.find(h => h.id === highlightId);
+                  if (highlight) {
+                    scrollTo(highlight);
+                  }
+                }
+              }}
+              onSelectionFinished={(
+                position,
+                content,
+                hideTipAndSelection,
+                transformSelection
+              ) => (
+                <CrewAITip
+                  onConfirm={(comment) => {
+                    handleActionConfirm(comment, { content, position });
+                    hideTipAndSelection();
+                  }}
+                  onCancel={hideTipAndSelection}
+                />
+              )}
+              highlightTransform={(
+                highlight,
+                index,
+                setTip,
+                hideTip,
+                viewportToScaled,
+                screenshot,
+                isScrolledTo
+              ) => {
+                const isTextHighlight = !highlight.content?.image;
+
+                const component = isTextHighlight ? (
+                  <Highlight
+                    isScrolledTo={isScrolledTo}
+                    position={highlight.position}
+                    comment={highlight.comment}
+                  />
+                ) : (
+                  <AreaHighlight
+                    isScrolledTo={isScrolledTo}
+                    highlight={highlight}
+                    onChange={(boundingRect) => {
+                      onUpdateHighlight(
+                        highlight.id,
+                        { boundingRect: viewportToScaled(boundingRect) },
+                        { image: screenshot(boundingRect) }
+                      );
+                    }}
+                  />
+                );
+
+                return (
+                  <Popup
+                    popupContent={
+                      <HighlightPopup 
+                        comment={highlight.comment}
+                        onAction={(action) => {
+                          handleExistingHighlightAction(action, highlight);
+                          hideTip();
+                        }}
+                        onDelete={() => {
+                          // Remove highlight by filtering it out
+                          const newHighlights = highlights.filter(h => h.id !== highlight.id);
+                          onResetHighlights();
+                          newHighlights.forEach(h => onAddHighlight(h));
+                          hideTip();
+                        }}
+                      />
+                    }
+                    onMouseOver={(popupContent) =>
+                      setTip(highlight, () => popupContent)
+                    }
+                    onMouseOut={hideTip}
+                    key={index}
+                  >
+                    {component}
+                  </Popup>
+                );
+              }}
+              highlights={highlights}
+            />
+          )}
+        </PdfLoader>
       </Box>
 
-      {/* Manual text input */}
-      <Paper sx={{ p: 2 }}>
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
-          <Typography variant="subtitle2">
-            Text Selection:
-          </Typography>
-          <Button 
-            size="small" 
-            variant="outlined"
-            onClick={() => setShowManualInput(!showManualInput)}
-          >
-            {showManualInput ? 'Hide' : 'Enter Text'}
-          </Button>
-        </Box>
-
-        {showManualInput && (
-          <Box sx={{ mb: 2 }}>
-            <TextField
-              fullWidth
-              multiline
-              rows={3}
-              placeholder="Copy text from the PDF above and paste it here..."
-              value={manualText}
-              onChange={(e) => setManualText(e.target.value)}
-              size="small"
-            />
-            <Box sx={{ mt: 1, display: 'flex', gap: 1 }}>
-              <Button 
-                variant="contained" 
-                size="small"
-                onClick={handleManualSubmit}
-                disabled={!manualText.trim()}
-              >
-                Use This Text
-              </Button>
-              <Button 
-                variant="outlined" 
-                size="small"
-                onClick={() => setManualText('')}
-              >
-                Clear
-              </Button>
-            </Box>
-          </Box>
-        )}
-
-        <Typography variant="body2" color="text.secondary">
-          💡 Copy text from the PDF above, then click "Enter Text" to paste it for analysis
+      {/* Instructions */}
+      <Paper sx={{ p: 1, mt: 1, backgroundColor: '#e3f2fd' }}>
+        <Typography variant="caption" color="text.secondary">
+          💡 <strong>Select text</strong> to highlight or trigger AI actions • <strong>Alt+drag</strong> for areas • <strong>Click highlights</strong> for options
+          {isLoading && ' • Processing...'}
         </Typography>
       </Paper>
     </Box>
