@@ -15,10 +15,13 @@
     "@fontsource/roboto": "^5.2.5",
     "@mui/icons-material": "^7.1.0",
     "@mui/material": "^7.1.0",
-    "pdfjs-dist": "^5.2.133",
     "react": "^19.1.0",
+<<<<<<< HEAD
     "react-dom": "^19.1.0",
     "react-pdf": "^9.1.1"
+=======
+    "react-dom": "^19.1.0"
+>>>>>>> parent of 2bbc3db (trying to get pdf and pdf selection to work)
   },
   "devDependencies": {
     "@eslint/js": "^9.25.0",
