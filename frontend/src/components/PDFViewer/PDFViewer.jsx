@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { Box, Typography, Paper, Button } from '@mui/material';
+import { Box } from '@mui/material';
 import DirectPDFViewer from './DirectPDFViewer';
 
 // Helper functions from react-pdf-highlighter example
@@ -20,9 +20,9 @@ export default function PDFViewer({
   onAction, 
   isLoading 
 }) {
-  const [selectedText, setSelectedText] = useState('');
   // Local highlights state for this component
   const [localHighlights, setLocalHighlights] = useState([]);
+  const [clearKey, setClearKey] = useState(0); // Key to force re-render only for clear all
   const scrollViewerTo = useRef((highlight) => {});
 
   // Get highlight by ID
@@ -87,94 +87,57 @@ export default function PDFViewer({
     );
   }, []);
 
-  // Reset highlights
+  // Delete individual highlight function - NO re-render forced
+  const deleteHighlight = useCallback((highlightId) => {
+    console.log("Deleting highlight with ID:", highlightId);
+    setLocalHighlights((prevHighlights) => 
+      prevHighlights.filter(h => h.id !== highlightId)
+    );
+    // Clear hash if it's pointing to the deleted highlight
+    if (document.location.hash === `#highlight-${highlightId}`) {
+      resetHash();
+    }
+  }, []);
+
+  // Reset highlights - FORCE re-render for clear all operation
   const resetHighlights = useCallback(() => {
+    console.log("Clearing all highlights - forcing re-render");
     setLocalHighlights([]);
     resetHash();
+    // Force re-render by incrementing the key
+    setClearKey(prev => prev + 1);
   }, []);
 
   // Handle action from highlighting
   const handleHighlightAction = useCallback((action, text) => {
-    onAction && onAction(action);
-    onTextSelection && onTextSelection(text);
+    console.log('PDFViewer handleHighlightAction:', action, text?.substring(0, 50));
+    
+    // Always pass the text to the parent action handler
+    if (onAction) {
+      onAction(action, text);
+    }
+    
+    // Also update parent's text selection
+    if (onTextSelection && text) {
+      onTextSelection(text);
+    }
   }, [onAction, onTextSelection]);
 
-  // Handle text selection from the PDF viewer - simplified to avoid duplication
-  const handleTextSelection = (text) => {
-    setSelectedText(text);
-    // Pass directly to parent without additional processing
-    onTextSelection && onTextSelection(text);
-  };
-
-  const handleAction = (action) => {
-    if (selectedText && onAction) {
-      onAction(action);
-    }
-  };
-
   return (
-    <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
-      {/* PDF Viewer - this handles the actual text selection */}
-      <Box sx={{ flex: 1 }}>
-        <DirectPDFViewer 
-          file={file}
-          highlights={localHighlights}
-          onAddHighlight={addHighlight}
-          onUpdateHighlight={updateHighlight}
-          onResetHighlights={resetHighlights}
-          onAction={handleHighlightAction}
-          isLoading={isLoading}
-          scrollViewerTo={scrollViewerTo}
-          resetHash={resetHash}
-        />
-      </Box>
-
-      {/* Action buttons - only show when text is selected */}
-      {selectedText && (
-        <Paper sx={{ p: 2, mt: 2 }}>
-          <Typography variant="subtitle2" gutterBottom>
-            Selected Text:
-          </Typography>
-          <Typography variant="body2" sx={{ mb: 2, fontStyle: 'italic' }}>
-            "{selectedText.length > 100 ? selectedText.substring(0, 100) + '...' : selectedText}"
-          </Typography>
-          
-          <Box sx={{ display: 'flex', gap: 1 }}>
-            <Button 
-              variant="outlined" 
-              size="small"
-              onClick={() => handleAction('summarize')}
-              disabled={isLoading}
-            >
-              Summarize
-            </Button>
-            <Button 
-              variant="outlined" 
-              size="small"
-              onClick={() => handleAction('explain')}
-              disabled={isLoading}
-            >
-              Explain
-            </Button>
-            <Button 
-              variant="outlined" 
-              size="small"
-              onClick={() => handleAction('question')}
-              disabled={isLoading}
-            >
-              Ask Question
-            </Button>
-            <Button 
-              variant="text" 
-              size="small"
-              onClick={() => setSelectedText('')}
-              color="secondary"
-            >
-              Clear
-            </Button>
-          </Box>
-        </Paper>
-      )}
+    <Box sx={{ height: '100%' }}>
+      <DirectPDFViewer 
+        key={`pdf-viewer-${clearKey}`} // Force re-render only when clearKey changes (clear all)
+        file={file}
+        highlights={localHighlights}
+        onAddHighlight={addHighlight}
+        onUpdateHighlight={updateHighlight}
+        onDeleteHighlight={deleteHighlight}
+        onResetHighlights={resetHighlights}
+        onAction={handleHighlightAction}
+        isLoading={isLoading}
+        scrollViewerTo={scrollViewerTo}
+        resetHash={resetHash}
+      />
     </Box>
   );
 }

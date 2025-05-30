@@ -10,12 +10,14 @@ import {
 } from '@mui/material';
 import { Psychology, CheckCircle } from '@mui/icons-material';
 
-export default function ResultsPanel({ results, isLoading, selectedText }) {
+export default function ResultsPanel({ results, isLoading, selectedText, highlights }) {
   const getActionColor = (action) => {
     switch (action) {
       case 'summarize': return 'primary';
-      case 'quiz': return 'success';
-      case 'search': return 'secondary';
+      case 'explain': return 'success';
+      case 'quiz': return 'secondary';
+      case 'analyze': return 'info';
+      case 'highlight': return 'warning';
       default: return 'default';
     }
   };
@@ -23,8 +25,10 @@ export default function ResultsPanel({ results, isLoading, selectedText }) {
   const getActionIcon = (action) => {
     switch (action) {
       case 'summarize': return '📝';
-      case 'quiz': return '🧠';
-      case 'search': return '🔍';
+      case 'explain': return '🧠';
+      case 'quiz': return '❓';
+      case 'analyze': return '🔍';
+      case 'highlight': return '💡';
       default: return '🤖';
     }
   };
@@ -52,6 +56,11 @@ export default function ResultsPanel({ results, isLoading, selectedText }) {
           <Typography variant="body2" color="text.secondary">
             AI is processing your request...
           </Typography>
+          {selectedText && (
+            <Typography variant="caption" color="text.secondary" sx={{ mt: 1, textAlign: 'center' }}>
+              Processing: "{selectedText.substring(0, 50)}..."
+            </Typography>
+          )}
         </Box>
       )}
       
@@ -73,7 +82,22 @@ export default function ResultsPanel({ results, isLoading, selectedText }) {
             </Box>
             
             <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-              Results:
+              Selected Text:
+            </Typography>
+            <Box sx={{ 
+              backgroundColor: 'grey.100', 
+              p: 1, 
+              borderRadius: 1,
+              mb: 2,
+              fontStyle: 'italic'
+            }}>
+              <Typography variant="body2">
+                "{results.text || selectedText}"
+              </Typography>
+            </Box>
+            
+            <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+              AI Result:
             </Typography>
             
             <Box sx={{ 
@@ -84,14 +108,49 @@ export default function ResultsPanel({ results, isLoading, selectedText }) {
               overflow: 'auto'
             }}>
               <Typography variant="body2">
-                {typeof results.data === 'string' ? results.data : JSON.stringify(results.data, null, 2)}
+                {results.error ? 
+                  `Error: ${results.error}` : 
+                  (typeof results.data === 'string' ? results.data : JSON.stringify(results.data, null, 2))
+                }
               </Typography>
             </Box>
+            
+            {results.timestamp && (
+              <Typography variant="caption" color="text.secondary" sx={{ mt: 1, display: 'block' }}>
+                Processed at: {new Date(results.timestamp).toLocaleTimeString()}
+              </Typography>
+            )}
           </CardContent>
         </Card>
       )}
 
-      {selectedText && (
+      {/* Show highlight summary */}
+      {highlights && highlights.length > 0 && (
+        <Box sx={{ mt: 1 }}>
+          <Typography variant="subtitle2" sx={{ mb: 1 }}>
+            Document Highlights ({highlights.length})
+          </Typography>
+          <Box sx={{ maxHeight: 200, overflow: 'auto' }}>
+            {highlights.slice(0, 5).map((highlight, index) => (
+              <Box key={highlight.id || index} sx={{ mb: 1, p: 1, backgroundColor: 'action.hover', borderRadius: 1 }}>
+                <Typography variant="caption">
+                  {highlight.comment?.emoji || '🎯'} {highlight.comment?.text || 'highlight'}
+                </Typography>
+                <Typography variant="body2" sx={{ fontSize: '0.75rem' }}>
+                  "{highlight.content?.text?.substring(0, 60) || 'No text'}..."
+                </Typography>
+              </Box>
+            ))}
+            {highlights.length > 5 && (
+              <Typography variant="caption" color="text.secondary">
+                +{highlights.length - 5} more highlights
+              </Typography>
+            )}
+          </Box>
+        </Box>
+      )}
+
+      {selectedText && !results && !isLoading && (
         <Box sx={{ mt: 'auto', p: 2, backgroundColor: 'action.hover', borderRadius: 1 }}>
           <Typography variant="caption" color="text.secondary">
             Currently selected:

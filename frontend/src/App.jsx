@@ -41,6 +41,8 @@ function App() {
   const handleFileSelect = (file) => {
     setSelectedFile(file); // Update the selected file
     setHighlights([]); // Clear highlights when a new file is selected
+    setResults(null); // Clear results
+    setSelectedText(''); // Clear selected text
   };
 
   // Handler for selecting text in the PDF viewer
@@ -54,30 +56,53 @@ function App() {
     setHighlights(prev => [...prev, highlight]); // Add the new highlight to the list
   };
 
-  // Handler for performing an action based on the selected text
-  const handleAction = async (action) => {
-    if (!selectedText) return; // Do nothing if no text is selected
+  // Updated handler for performing an action - now accepts text parameter
+  const handleAction = async (action, text = selectedText) => {
+    // Make sure we have text to work with
+    const textToProcess = text || selectedText;
+    
+    if (!textToProcess) {
+      console.warn('No text available for action:', action);
+      return; // Do nothing if no text is available
+    }
 
     // If it's just a highlight action, don't process with AI
     if (action === 'highlight') {
-      console.log('Text highlighted:', selectedText);
+      console.log('Text highlighted:', textToProcess);
+      setSelectedText(textToProcess); // Update selected text for display
       return; // Just keep the highlight, no AI processing
     }
 
     setIsLoading(true); // Set loading state to true
+    
     try {
-      console.log(`Performing ${action} on text:`, selectedText.substring(0, 100));
+      console.log(`Performing ${action} on text:`, textToProcess.substring(0, 100));
       
       // Simulate an API call with a timeout (mock results for now)
-      setTimeout(() => {
-        setResults({ 
-          action, 
-          data: `Mock ${action} result for: "${selectedText.substring(0, 50)}..."` // Mock result data
-        });
-        setIsLoading(false); // Set loading state to false
-      }, 2000);
+      const response = await new Promise((resolve) => {
+        setTimeout(() => {
+          resolve({
+            action,
+            text: textToProcess.substring(0, 100) + (textToProcess.length > 100 ? '...' : ''),
+            data: `Mock ${action} result for: "${textToProcess.substring(0, 50)}${textToProcess.length > 50 ? '...' : ''}"`,
+            timestamp: new Date().toISOString(),
+            fullText: textToProcess // Keep the full text for reference
+          });
+        }, 2000);
+      });
+
+      setResults(response);
+      setSelectedText(textToProcess); // Update selected text to show what was processed
+      
     } catch (error) {
       console.error('Error calling API:', error); // Log any errors
+      setResults({
+        action,
+        text: textToProcess.substring(0, 100) + (textToProcess.length > 100 ? '...' : ''),
+        error: 'Failed to process request',
+        timestamp: new Date().toISOString(),
+      });
+    } finally {
       setIsLoading(false); // Set loading state to false
     }
   };
@@ -108,7 +133,7 @@ function App() {
                   onTextSelection={handleTextSelection} // Pass text selection handler
                   onHighlight={handleHighlight} // Pass highlight handler
                   highlights={highlights} // Pass current highlights
-                  onAction={handleAction} // Pass action handler
+                  onAction={handleAction} // Pass action handler (now accepts text parameter)
                   isLoading={isLoading} // Pass loading state
                 />
               </Paper>
@@ -121,6 +146,7 @@ function App() {
                   results={results} // Pass results data
                   isLoading={isLoading} // Pass loading state
                   selectedText={selectedText} // Pass currently selected text
+                  highlights={highlights} // Pass highlights for display
                 />
               </Paper>
             </Grid>

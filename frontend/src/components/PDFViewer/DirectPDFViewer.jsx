@@ -1,4 +1,4 @@
-import React, { useCallback } from 'react';
+import React, { useCallback, useEffect } from 'react';
 import {
   AreaHighlight,
   Highlight,
@@ -103,7 +103,7 @@ const HighlightPopup = ({ comment, onAction, onDelete }) => (
         startIcon={<Delete />}
         sx={{ mt: 1, color: 'error.main' }}
       >
-        Delete Highlight
+        Delete This Highlight
       </Button>
     )}
   </Paper>
@@ -131,6 +131,7 @@ export default function DirectPDFViewer({
   onAddHighlight,
   onUpdateHighlight,
   onResetHighlights,
+  onDeleteHighlight,
   onAction,
   isLoading,
   scrollViewerTo,
@@ -171,6 +172,27 @@ export default function DirectPDFViewer({
       onAction(action, highlight.content.text);
     }
   }, [onAction, onUpdateHighlight]);
+
+  // Handle clear all highlights - Enhanced feedback
+  const handleClearAll = useCallback(() => {
+    console.log("Clear All clicked - clearing", highlights.length, "highlights");
+    resetHash();
+    onResetHighlights();
+  }, [onResetHighlights, resetHash, highlights.length]);
+
+  // Handle individual highlight deletion - FIXED
+  const handleDeleteHighlight = useCallback((highlightToDelete) => {
+    console.log('Deleting individual highlight:', highlightToDelete.id);
+    
+    // Use the new onDeleteHighlight prop if available, otherwise filter manually
+    if (onDeleteHighlight) {
+      onDeleteHighlight(highlightToDelete.id);
+    } else {
+      // Fallback: let the parent component handle it by notifying about the deletion
+      console.warn('onDeleteHighlight not provided, using fallback method');
+      // You could also emit an event or use a callback here
+    }
+  }, [onDeleteHighlight]);
 
   // Helper function to get emoji for actions
   const getActionEmoji = (action) => {
@@ -217,8 +239,9 @@ export default function DirectPDFViewer({
             <Button 
               size="small" 
               variant="outlined" 
-              onClick={onResetHighlights}
+              onClick={handleClearAll}
               startIcon={<Delete />}
+              color="error" // Make it more obvious it's a destructive action
             >
               Clear All
             </Button>
@@ -249,7 +272,7 @@ export default function DirectPDFViewer({
         </Paper>
       )}
 
-      {/* PDF Highlighter (following the example pattern exactly) */}
+      {/* PDF Highlighter - NO key prop here since it's handled by parent */}
       <Box sx={{ flex: 1, position: 'relative' }}>
         <PdfLoader url={pdfUrl} beforeLoad={<Spinner />}>
           {(pdfDocument) => (
@@ -323,10 +346,7 @@ export default function DirectPDFViewer({
                           hideTip();
                         }}
                         onDelete={() => {
-                          // Remove highlight by filtering it out
-                          const newHighlights = highlights.filter(h => h.id !== highlight.id);
-                          onResetHighlights();
-                          newHighlights.forEach(h => onAddHighlight(h));
+                          handleDeleteHighlight(highlight);
                           hideTip();
                         }}
                       />
