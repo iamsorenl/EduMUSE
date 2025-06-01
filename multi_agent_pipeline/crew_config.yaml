@@ -1,0 +1,12 @@
+orchestrator:
+  orchestrator_class: "orchestrator.orchestrator:MultiAgentOrchestrator"
+
+agents:
+  agents_package: "agents"
+
+runtime_options:
+  env:
+    OPENAI_API_KEY: "${API-KEY}"
+
+deploy:
+  run_command: "python main.py --input \"<YOUR_TEST_QUERY_HERE>\""

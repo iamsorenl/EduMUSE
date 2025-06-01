@@ -1,0 +1,7 @@
+crewei
+openai
+whisper
+pdfminer.six
+beautifulsoup4
+requests
+numpy
