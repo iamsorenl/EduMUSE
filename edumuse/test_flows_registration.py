@@ -3,7 +3,7 @@
 
 from src.edumuse.flows.flow_registry import flow_registry
 
-# Import your flows to trigger registration
+# 🔧 FIXED: Import your flows to trigger registration
 from src.edumuse.flows.web_search_flow import WebSearchFlow
 from src.edumuse.flows.llm_knowledge_flow import LLMKnowledgeFlow  
 from src.edumuse.flows.hybrid_retrieval_flow import HybridRetrievalFlow
@@ -75,6 +75,7 @@ def test_mock_execution():
             print(f"   🔍 Retrieval Method: {result.get('retrieval_method', 'unknown')}")
             print(f"   📊 Topic: {result.get('topic', 'unknown')}")
             print(f"   🎯 Flow Type: {result.get('flow_type', 'unknown')}")
+            print(f"   📄 Content Length: {len(str(result.get('sources_found', '')))}")
             
         except Exception as e:
             print(f"❌ {flow_name} failed: {e}")

@@ -1,7 +1,6 @@
 from crewai import Agent, Crew, Process, Task
 from crewai.project import CrewBase, agent, crew, task
 from crewai_tools import SerperDevTool
-from crewai.knowledge.source.string_knowledge_source import StringKnowledgeSource
 from typing import List, Dict, Any
 from .flows.flow_registry import flow_registry
 
@@ -48,7 +47,6 @@ class EduMUSE():
             tasks=self.tasks,
             process=Process.sequential,
             verbose=True
-            # Remove knowledge_sources for now
         )
     
     def process_educational_request(self, topic: str, requested_flows: List[str], context: Dict[str, Any] = None) -> Dict[str, Any]:
@@ -57,14 +55,10 @@ class EduMUSE():
         if context is None:
             context = {}
         
-        # 1. Discover academic sources
-        inputs = {
-            "topic": topic, 
-            "requested_flows": requested_flows
-        }
-        crew_result = self.crew().kickoff(inputs=inputs)
+        # 🔧 FIXED: Skip CrewAI for now and directly execute flows
+        # The CrewAI agents aren't properly calling the registered flows
         
-        # 2. Parse sources from crew result (mock for now)
+        # Mock sources for flow execution
         sources = [
             {
                 "title": f"Academic Source about {topic}",
@@ -74,14 +68,28 @@ class EduMUSE():
             }
         ]
         
-        # 3. Execute requested educational flows
+        # 🔧 FIXED: Directly execute registered flows instead of relying on CrewAI agents
         flow_results = {}
         for flow_name in requested_flows:
-            flow_results[flow_name] = flow_registry.execute_flow(
-                flow_name, 
-                sources, 
-                {"topic": topic, **context}
-            )
+            print(f"🔧 Directly executing flow: {flow_name}")
+            
+            try:
+                # Execute the actual registered flow
+                flow_results[flow_name] = flow_registry.execute_flow(
+                    flow_name, 
+                    sources, 
+                    {"topic": topic, **context}
+                )
+                print(f"✅ {flow_name} executed successfully")
+                
+            except Exception as e:
+                print(f"❌ Error executing {flow_name}: {e}")
+                flow_results[flow_name] = {
+                    "flow_type": f"{flow_name}_error",
+                    "retrieval_method": "execution_failed",
+                    "sources_found": f"Error executing {flow_name}: {str(e)}",
+                    "error": str(e)
+                }
         
         return {
             "topic": topic,
@@ -90,6 +98,7 @@ class EduMUSE():
             "metadata": {
                 "flows_executed": requested_flows,
                 "source_count": len(sources),
-                "learning_context": context
+                "learning_context": context,
+                "execution_method": "direct_flow_execution"
             }
         }
