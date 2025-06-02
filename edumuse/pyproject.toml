@@ -1,7 +1,7 @@
 [project]
-name = "search_rec"
+name = "edumuse"
 version = "0.1.0"
-description = "search_rec using crewAI"
+description = "EduMUSE: Modular Educational AI Assistant with Pluggable Learning Flows"
 authors = [{ name = "Your Name", email = "you@example.com" }]
 requires-python = ">=3.10,<3.13"
 dependencies = [
@@ -9,11 +9,10 @@ dependencies = [
 ]
 
 [project.scripts]
-search_rec = "search_rec.main:run"
-run_crew = "search_rec.main:run"
-train = "search_rec.main:train"
-replay = "search_rec.main:replay"
-test = "search_rec.main:test"
+edumuse = "edumuse.main:run"
+train = "edumuse.main:train"
+replay = "edumuse.main:replay" 
+test = "edumuse.main:test"
 
 [build-system]
 requires = ["hatchling"]

@@ -1,0 +1,48 @@
+discovery_task:
+  description: |
+    Discover academic sources about {topic} and prepare structured data for educational enhancement.
+    Focus on finding credible, recent, and educationally valuable sources from:
+    1. Academic databases (ArXiv, Google Scholar, IEEE)
+    2. Educational institutions (.edu domains)
+    3. Peer-reviewed publications
+    4. Authoritative documentation and standards
+    
+    Output structured data that includes source URLs, credibility scores, abstracts, 
+    and metadata suitable for educational content generation.
+  expected_output: |
+    JSON list of academic sources with the following structure:
+    [
+      {
+        "title": "Source Title",
+        "url": "https://example.com",
+        "credibility_score": 8.5,
+        "source_type": "academic_paper",
+        "abstract": "Brief description...",
+        "metadata": {
+          "publication_date": "2024-01-01",
+          "authors": ["Author Name"],
+          "institution": "University Name"
+        }
+      }
+    ]
+  agent: academic_searcher  # ✅ Specify agent in YAML config instead
+
+flow_orchestration_task:
+  description: |
+    Execute the requested educational flows: {requested_flows} on the discovered sources for topic: {topic}.
+    
+    Available flows and their purposes:
+    - web_search: Use web search APIs for current academic sources
+    - llm_knowledge: Extract knowledge from LLM training data
+    - hybrid_retrieval: Combine web search with LLM knowledge
+    
+    Consider the learning context and user preferences when executing flows.
+    Ensure outputs are educationally valuable and properly formatted.
+  expected_output: |
+    Structured educational content from all executed flows in JSON format:
+    {
+      "web_search": {"retrieval_method": "...", "sources_found": "..."},
+      "llm_knowledge": {"retrieval_method": "...", "sources_found": "..."},
+      "hybrid_retrieval": {"retrieval_method": "...", "sources_found": "..."}
+    }
+  agent: flow_coordinator  # ✅ Specify agent in YAML config instead
