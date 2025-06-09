@@ -1,0 +1,216 @@
+# Search Agent Plan for EduMUSE
+
+## Project Context
+EduMUSE is an educational assistant that helps students learn from PDFs and documents. 
+The edumuse component will help users find additional academic resources to deepen 
+their understanding of topics they're studying.
+
+## Updated Goal: Modular Academic Research Assistant
+
+### Core Architecture: Pluggable Flow System
+```
+Base Flow: Academic Source Discovery
+    ↓ (Outputs: Curated Resource List + Metadata)
+Plugin Flows: 
+├── Quiz Creator Flow (generates practice questions)
+├── Summary Flow (creates concept explanations)  
+├── Study Plan Flow (organizes learning sequence)
+├── Citation Flow (formats references)
+└── [Future Custom Flows...]
+```
+
+### Input Sources
+- PDF documents (research papers, textbooks, course materials)
+- Text content (extracted from documents or user queries)
+- User study materials already in the system
+
+### Primary Objective
+Build a **modular search and enhancement system** that:
+1. **Discovers** credible academic sources (base flow)
+2. **Enhances** learning through pluggable flows (quiz, summary, etc.)
+3. **Adapts** to different learning needs through flow combinations
+
+### Base Flow: Academic Source Discovery
+
+#### Target Source Types (Priority Order)
+1. **Academic Papers** - ArXiv, Google Scholar, research journals
+2. **Educational Institutions** - University course materials, lecture notes
+3. **Scientific Organizations** - IEEE, ACM, Nature, Science journals
+4. **Authoritative Documentation** - Official specs, standards, government sources
+5. **Expert Content** - Peer-reviewed articles, expert blogs with citations
+
+#### Web Search Strategy
+1. **Extract key concepts** from input PDF/text
+2. **Generate academic search queries** (e.g., "machine learning neural networks filetype:pdf")
+3. **Search multiple academic databases** and sources
+4. **Filter for credibility** (domain authority, citation counts, peer review)
+5. **Rank by relevance** to original study material
+6. **Output structured data** for plugin flows
+
+### Plugin Flow Architecture
+
+#### Flow Interface Standard
+```python
+class EducationFlow:
+    def process(self, resource_list: List[AcademicSource], context: StudyContext) -> FlowOutput
+    def get_flow_info(self) -> FlowMetadata
+```
+
+#### Planned Plugin Flows
+
+##### 1. Quiz Creator Flow
+- **Input**: Academic sources + study context
+- **Process**: Generate practice questions from source content
+- **Output**: Interactive quizzes with explanations
+- **Agents**: Question Generator + Answer Validator
+
+##### 2. Summary Flow  
+- **Input**: Complex academic sources
+- **Process**: Create layered summaries (beginner → advanced)
+- **Output**: Multi-level concept explanations
+- **Agents**: Concept Extractor + Summary Writer
+
+##### 3. Study Plan Flow
+- **Input**: Resource list + user learning level
+- **Process**: Organize sources into learning sequence
+- **Output**: Structured study roadmap
+- **Agents**: Curriculum Designer + Progress Tracker
+
+##### 4. Citation Flow
+- **Input**: Used academic sources
+- **Process**: Format citations and bibliography
+- **Output**: APA/MLA formatted references
+- **Agents**: Citation Formatter + Reference Validator
+
+### Core Flow Implementation
+
+#### Base Agents (Enhanced from Current)
+```yaml
+# Enhanced researcher for academic discovery
+academic_searcher:
+  role: "Academic Source Discovery Specialist"
+  goal: "Find credible academic sources and prepare structured data for enhancement flows"
+  tools: [SerperDevTool, ArxivTool, ScholarTool]
+
+# Enhanced analyst for quality and flow preparation  
+source_assessor:
+  role: "Academic Quality Assessment and Flow Coordinator"
+  goal: "Evaluate sources and prepare enriched data for plugin flows"
+  
+# New coordinator for managing plugin flows
+flow_coordinator:
+  role: "Educational Flow Orchestrator" 
+  goal: "Coordinate and execute appropriate plugin flows based on user needs"
+```
+
+### Flow Registration System
+
+#### Flow Registry
+```python
+# Plugin flows register themselves
+flow_registry = {
+    "quiz": QuizCreatorFlow(),
+    "summary": SummaryFlow(), 
+    "study_plan": StudyPlanFlow(),
+    "citation": CitationFlow()
+}
+
+# Users can request specific flows
+requested_flows = ["quiz", "summary"]  # From user input or defaults
+```
+
+### Quality Criteria for Sources
+- **Credibility**: .edu, .org, known academic publishers
+- **Recency**: Prefer recent publications (last 5 years for fast-moving fields)
+- **Depth**: Comprehensive coverage, not superficial articles
+- **Accessibility**: Available full-text or abstracts
+- **Citation Quality**: Well-cited sources, proper references
+- **Flow Compatibility**: Rich enough content for enhancement flows
+
+### Manual Testing Methodology (Updated)
+1. **Base Flow**: Test academic source discovery with quality assessment
+2. **Single Plugin**: Add one flow (e.g., quiz creator) and test integration
+3. **Multi-Plugin**: Test combinations (search → quiz + summary)
+4. **Flow Swapping**: Test different plugin combinations for same input
+5. **Compare**: Manual evaluation vs monolithic approaches
+
+### Success Metrics (Enhanced)
+- **Source Credibility**: % of sources from academic/authoritative domains
+- **Relevance**: How well sources relate to input study material
+- **Accessibility**: % of sources with available full-text
+- **Flow Effectiveness**: Quality of plugin flow outputs (quiz quality, summary clarity)
+- **Modularity**: Ease of adding/removing flows
+- **User Satisfaction**: Learning value across different flow combinations
+
+### Integration with EduMUSE
+- **PDF Analysis**: Extract key topics from user's study PDFs
+- **Flow Selection**: Users choose which enhancement flows to apply
+- **Contextual Processing**: Each flow considers user's study context
+- **Progressive Learning**: Flows adapt based on user progress
+- **Cross-Flow Learning**: Flows can use outputs from other flows
+
+### Technical Implementation Phases
+
+#### Phase 1: Modular Base Flow (Current Focus)
+- Enhance researcher agent with web search tools
+- Design flow interface and data structures
+- Create structured output format for plugin flows
+- Manual comparison with baseline LLM results
+
+#### Phase 2: First Plugin Flow (Quiz Creator)
+- Implement quiz generation flow using discovered sources
+- Test academic question quality and relevance  
+- Validate flow interface design
+- Manual evaluation of quiz educational value
+
+#### Phase 3: Multi-Flow System
+- Add summary and study plan flows
+- Implement flow coordinator agent
+- Test flow combinations and interactions
+- Optimize flow selection based on content type
+
+#### Phase 4: Advanced Integration
+- Connect with EduMUSE PDF processing pipeline
+- Add user preference learning across flows
+- Implement study progression tracking
+- Create flow recommendation system
+
+### Current Status
+- ✅ Basic 2-agent system working (researcher + analyst)
+- ✅ Experimental framework established
+- 🔄 Designing modular flow architecture (in progress)
+- 🔄 Adding web search tools (in progress)
+- ⏳ Quiz creator flow implementation (next)
+- ⏳ Multi-flow coordination (future)
+- ⏳ EduMUSE integration (future)
+
+### Next Actions
+1. **Enhance base flow** with SerperDevTool for academic searches
+2. **Design flow interface** for plugin architecture
+3. **Implement quiz creator flow** as first plugin
+4. **Test flow combination** (search → quiz)
+5. **Document modularity benefits** for academic evaluation
+
+### Key Questions to Answer
+- What's the optimal flow interface for maximum modularity?
+- How should flows share data and context?
+- Which flows provide the most educational value?
+- How to handle flow dependencies and conflicts?
+- What's the best user experience for flow selection?
+
+### Plugin Flow Examples for Demo
+```
+Input: "Machine Learning PDF"
+↓
+Base Flow: Find 10 ML academic sources
+↓
+Quiz Flow: Generate 15 practice questions
+Summary Flow: Create beginner/advanced explanations  
+Citation Flow: Format APA bibliography
+Study Plan Flow: Week-by-week learning sequence
+```
+
+---
+Last Updated: June 1, 2025
+Project: EduMUSE - Educational AI Assistant  
+Component: edumuse - Modular Academic Research Assistant

@@ -1,0 +1,219 @@
+{
+  "individual_results": [
+    {
+      "topic": "machine learning transformers",
+      "flow_name": "web_search",
+      "processing_time": 0.0026788711547851562,
+      "quality_scores": {
+        "relevance": 0.0,
+        "credibility": 5.0,
+        "coverage": 1.0,
+        "recency": 0.0,
+        "accessibility": 9.0
+      },
+      "total_score": 2.35,
+      "sources_count": 1,
+      "content_length": 49,
+      "retrieval_method": "unknown"
+    },
+    {
+      "topic": "machine learning transformers",
+      "flow_name": "llm_knowledge",
+      "processing_time": 0.00168609619140625,
+      "quality_scores": {
+        "relevance": 0.0,
+        "credibility": 5.0,
+        "coverage": 1.0,
+        "recency": 0.0,
+        "accessibility": 9.0
+      },
+      "total_score": 2.35,
+      "sources_count": 1,
+      "content_length": 52,
+      "retrieval_method": "unknown"
+    },
+    {
+      "topic": "machine learning transformers",
+      "flow_name": "hybrid_retrieval",
+      "processing_time": 0.0018277168273925781,
+      "quality_scores": {
+        "relevance": 0.0,
+        "credibility": 5.0,
+        "coverage": 1.0,
+        "recency": 0.0,
+        "accessibility": 9.0
+      },
+      "total_score": 2.35,
+      "sources_count": 1,
+      "content_length": 55,
+      "retrieval_method": "unknown"
+    },
+    {
+      "topic": "quantum computing algorithms",
+      "flow_name": "web_search",
+      "processing_time": 0.0016541481018066406,
+      "quality_scores": {
+        "relevance": 0.0,
+        "credibility": 5.0,
+        "coverage": 1.0,
+        "recency": 0.0,
+        "accessibility": 9.0
+      },
+      "total_score": 2.35,
+      "sources_count": 1,
+      "content_length": 49,
+      "retrieval_method": "unknown"
+    },
+    {
+      "topic": "quantum computing algorithms",
+      "flow_name": "llm_knowledge",
+      "processing_time": 0.0016160011291503906,
+      "quality_scores": {
+        "relevance": 0.0,
+        "credibility": 5.0,
+        "coverage": 1.0,
+        "recency": 0.0,
+        "accessibility": 9.0
+      },
+      "total_score": 2.35,
+      "sources_count": 1,
+      "content_length": 52,
+      "retrieval_method": "unknown"
+    },
+    {
+      "topic": "quantum computing algorithms",
+      "flow_name": "hybrid_retrieval",
+      "processing_time": 0.0016391277313232422,
+      "quality_scores": {
+        "relevance": 0.0,
+        "credibility": 5.0,
+        "coverage": 1.0,
+        "recency": 0.0,
+        "accessibility": 9.0
+      },
+      "total_score": 2.35,
+      "sources_count": 1,
+      "content_length": 55,
+      "retrieval_method": "unknown"
+    },
+    {
+      "topic": "climate change policy",
+      "flow_name": "web_search",
+      "processing_time": 0.0016219615936279297,
+      "quality_scores": {
+        "relevance": 0.0,
+        "credibility": 5.0,
+        "coverage": 1.0,
+        "recency": 0.0,
+        "accessibility": 9.0
+      },
+      "total_score": 2.35,
+      "sources_count": 1,
+      "content_length": 49,
+      "retrieval_method": "unknown"
+    },
+    {
+      "topic": "climate change policy",
+      "flow_name": "llm_knowledge",
+      "processing_time": 0.0017573833465576172,
+      "quality_scores": {
+        "relevance": 0.0,
+        "credibility": 5.0,
+        "coverage": 1.0,
+        "recency": 0.0,
+        "accessibility": 9.0
+      },
+      "total_score": 2.35,
+      "sources_count": 1,
+      "content_length": 52,
+      "retrieval_method": "unknown"
+    },
+    {
+      "topic": "climate change policy",
+      "flow_name": "hybrid_retrieval",
+      "processing_time": 0.001737356185913086,
+      "quality_scores": {
+        "relevance": 0.0,
+        "credibility": 5.0,
+        "coverage": 1.0,
+        "recency": 0.0,
+        "accessibility": 9.0
+      },
+      "total_score": 2.35,
+      "sources_count": 1,
+      "content_length": 55,
+      "retrieval_method": "unknown"
+    }
+  ],
+  "comparative_summary": {
+    "web_search": {
+      "avg_processing_time": 0.0019849936167399087,
+      "avg_total_score": 2.35,
+      "avg_sources_count": 1.0,
+      "avg_content_length": 49.0,
+      "quality_breakdown": {
+        "relevance": 0.0,
+        "credibility": 5.0,
+        "coverage": 1.0,
+        "recency": 0.0,
+        "accessibility": 9.0
+      }
+    },
+    "llm_knowledge": {
+      "avg_processing_time": 0.0016864935557047527,
+      "avg_total_score": 2.35,
+      "avg_sources_count": 1.0,
+      "avg_content_length": 52.0,
+      "quality_breakdown": {
+        "relevance": 0.0,
+        "credibility": 5.0,
+        "coverage": 1.0,
+        "recency": 0.0,
+        "accessibility": 9.0
+      }
+    },
+    "hybrid_retrieval": {
+      "avg_processing_time": 0.0017347335815429688,
+      "avg_total_score": 2.35,
+      "avg_sources_count": 1.0,
+      "avg_content_length": 55.0,
+      "quality_breakdown": {
+        "relevance": 0.0,
+        "credibility": 5.0,
+        "coverage": 1.0,
+        "recency": 0.0,
+        "accessibility": 9.0
+      }
+    }
+  },
+  "methodology": {
+    "evaluation_criteria": {
+      "relevance": {
+        "weight": 0.3,
+        "max_score": 10
+      },
+      "credibility": {
+        "weight": 0.25,
+        "max_score": 10
+      },
+      "coverage": {
+        "weight": 0.2,
+        "max_score": 10
+      },
+      "recency": {
+        "weight": 0.15,
+        "max_score": 10
+      },
+      "accessibility": {
+        "weight": 0.1,
+        "max_score": 10
+      }
+    },
+    "test_topics_count": 3,
+    "flows_tested": [
+      "web_search",
+      "llm_knowledge",
+      "hybrid_retrieval"
+    ]
+  }
+}
