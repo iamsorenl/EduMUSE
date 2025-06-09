@@ -1,0 +1,48 @@
+{
+  "topic": "machine learning neural networks",
+  "sources": [
+    {
+      "title": "Academic Source about machine learning neural networks",
+      "url": "https://example.edu/paper1",
+      "credibility_score": 8.5,
+      "source_type": "academic_paper"
+    }
+  ],
+  "educational_content": {
+    "quiz": {
+      "type": "quiz",
+      "content": "Mock quiz output - flow not implemented yet",
+      "sources_used": 1,
+      "context": {
+        "topic": "machine learning neural networks",
+        "user_level": "intermediate",
+        "learning_objective": "understand practical applications",
+        "time_available": "30 minutes"
+      }
+    },
+    "summary": {
+      "type": "summary",
+      "content": "Mock summary output - flow not implemented yet",
+      "sources_used": 1,
+      "context": {
+        "topic": "machine learning neural networks",
+        "user_level": "intermediate",
+        "learning_objective": "understand practical applications",
+        "time_available": "30 minutes"
+      }
+    }
+  },
+  "metadata": {
+    "flows_executed": [
+      "quiz",
+      "summary"
+    ],
+    "source_count": 1,
+    "learning_context": {
+      "user_level": "intermediate",
+      "learning_objective": "understand practical applications",
+      "time_available": "30 minutes"
+    },
+    "execution_method": "direct_flow_execution"
+  }
+}

@@ -2,14 +2,14 @@
 name = "edumuse"
 version = "0.1.0"
 description = "EduMUSE: Modular Educational AI Assistant with Pluggable Learning Flows"
-authors = [{ name = "Your Name", email = "you@example.com" }]
+authors = [{ name = "Soren Larsen", email = "snlarsen@ucsc.edu" }]
 requires-python = ">=3.10,<3.13"
 dependencies = [
     "crewai[tools]>=0.121.1,<1.0.0"
 ]
 
 [project.scripts]
-edumuse = "edumuse.main:run"
+run_crew = "edumuse.main:run"
 train = "edumuse.main:train"
 replay = "edumuse.main:replay" 
 test = "edumuse.main:test"
