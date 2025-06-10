@@ -6,8 +6,8 @@ from datetime import datetime
 
 app = Flask(__name__)
 
-# Simplified CORS configuration - remove the complex config
-CORS(app, origins=["http://localhost:5173", "http://127.0.0.1:5173", "http://localhost:3000", "http://127.0.0.1:3000"])
+# Configure CORS to allow all origins and credentials
+CORS(app, resources={r"/*": {"origins": "*", "supports_credentials": True}})
 
 # Configure upload folder
 UPLOAD_FOLDER = 'uploads'
