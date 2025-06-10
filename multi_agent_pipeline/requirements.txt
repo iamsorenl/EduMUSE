@@ -1,4 +1,4 @@
-crewei
+crewai
 openai
 whisper
 pdfminer.six
@@ -9,3 +9,6 @@ gTTS
 torch
 torchaudio
 tortoise-tts
+elevenlabs
+pydub
+python-dotenv

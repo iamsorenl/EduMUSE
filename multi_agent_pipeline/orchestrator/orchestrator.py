@@ -11,66 +11,52 @@ from agents.agents import (
     FormattingAgent,
     TTSAgent,
 )
+# from agents.tts_agent import TTSAgent
+
 class MultiAgentOrchestrator:
     """
     Orchestrates the flow through all agents.
     """
     def __init__(self):
-        # Initialize each agent
+        print("Initializing MultiAgentOrchestrator...")
         self.input_detector = InputDetectionAgent()
-        self.stt_agent = SpeechToTextAgent()
         self.content_agent = ContentAcquisitionAgent()
-        self.query_agent = QueryUnderstandingAgent()
-        self.retriever = RetrievalAgent()
-        self.answer_agent = AnswerGenerationAgent()
-        self.verifier = VerificationAgent()
-        self.visual_agent = VisualGenerationAgent()
-        self.formatter = FormattingAgent()
         self.tts_agent = TTSAgent()
+        print("Orchestrator initialized successfully")
 
-    def run(self, user_input: Any, request_tts: bool = False, 
-            host_voice: str = "tom", guest_voice: str = "emma", 
-            preset: str = "fast") -> Dict[str, Any]:
+    def run(self, user_input: Any, request_tts: bool = False) -> Dict[str, Any]:
+        print("\n=== Starting Pipeline ===")
+        print(f"Input: {user_input}")
+        print(f"TTS requested: {request_tts}")
+
         # Initialize context with user input
         context: Dict[str, Any] = {
             "user_input": user_input,
             "request_tts": request_tts,
         }
 
-        # Set TTS parameters if requested
-        if request_tts:
-            self.tts_agent.set_voices(host_voice, guest_voice)
-            self.tts_agent.set_preset(preset)
-
         # Detect input type
+        print("\n=== Detecting Input Type ===")
         context = self.input_detector(context)
+        print(f"Detected input type: {context['input_descriptor']['type']}")
         
-        if context["input_descriptor"]["type"] == "audio":
-            context = self.stt_agent(context)
-
+        # Get content from PDF
+        print("\n=== Acquiring Content ===")
         context = self.content_agent(context)
+        if context.get("fetched_content"):
+            print("Content successfully fetched")
+            print(f"Content length: {len(context['fetched_content'])} characters")
+        else:
+            print("WARNING: No content was fetched!")
 
-        # Parse question and extract intent/entities
-        context = self.query_agent(context)
-
-        # Retrieve relevant passages
-        context = self.retriever(context)
-
-        # Generate an answer using LLM
-        context = self.answer_agent(context)
-
-        # Verify the generated answer
-        context = self.verifier(context)
-
-        # If a visual is needed, create it
-        if context.get("needs_visual", False):
-            context = self.visual_agent(context)
-
-        # Format the final response
-        context = self.formatter(context)
-
-        # If TTS was requested, synthesize speech
+        # Generate podcast and audio
         if request_tts:
+            print("\n=== Generating Podcast ===")
             context = self.tts_agent(context)
+            if context.get("audio_output"):
+                print("Audio generation completed successfully")
+            else:
+                print("WARNING: Audio generation failed!")
 
-        return context.get("formatted_response")
+        print("\n=== Pipeline Complete ===")
+        return context

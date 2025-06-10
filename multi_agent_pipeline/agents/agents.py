@@ -12,14 +12,6 @@ from typing import Any, Dict, List, Optional
 # pdfminer imports
 from pdfminer.high_level import extract_text
 
-from gtts import gTTS
-from datetime import datetime
-
-import torch
-from tortoise.api import TextToSpeech
-from tortoise.utils.audio import load_audio, load_voice, load_voices
-import torchaudio
-
 # Make sure OPENAI_API_KEY is set in your environment
 
 
@@ -406,130 +398,14 @@ class FormattingAgent:
         context["formatted_response"] = formatted
         return context
 
-
+#TODO: need to figure this
 class TTSAgent:
-    """
-    Converts text content into a podcast-style conversation using Tortoise TTS.
-    """
-    def __init__(self, output_dir: str = "audio_output"):
-        self.output_dir = output_dir
-        os.makedirs(output_dir, exist_ok=True)
-        
-        # Initialize Tortoise TTS
-        self.tts = TextToSpeech()
-        
-        # Define podcast host and guest voices
-        self.host_voice = "tom"  # Main narrator/host
-        self.guest_voice = "emma"  # Secondary voice/guest
-        
-        # Default preset
-        self.default_preset = "fast"
 
-    def _format_as_conversation(self, text: str) -> List[Dict[str, str]]:
-        """
-        Format the text into a conversation between host and guest.
-        """
-        # Split text into paragraphs
-        paragraphs = [p.strip() for p in text.split('\n\n') if p.strip()]
-        
-        conversation = []
-        is_host_turn = True
-        
-        for paragraph in paragraphs:
-            # Skip very short paragraphs
-            if len(paragraph.split()) < 5:
-                continue
-                
-            # Add speaker label
-            speaker = "HOST" if is_host_turn else "GUEST"
-            conversation.append({
-                "speaker": speaker,
-                "text": paragraph,
-                "voice": self.host_voice if is_host_turn else self.guest_voice
-            })
-            
-            # Switch turns
-            is_host_turn = not is_host_turn
-            
-        return conversation
-
-    def _add_transition_sound(self, audio_segments: List[torch.Tensor]) -> List[torch.Tensor]:
-        """
-        Add a short pause between speakers.
-        """
-        # Create a short silence (0.5 seconds)
-        silence = torch.zeros(12000)  # 0.5 seconds at 24000 Hz
-        
-        new_segments = []
-        for i, segment in enumerate(audio_segments):
-            new_segments.append(segment)
-            if i < len(audio_segments) - 1:  # Don't add silence after the last segment
-                new_segments.append(silence)
-        
-        return new_segments
+    def __init__(self):
+        pass
 
     def __call__(self, context: Dict[str, Any]) -> Dict[str, Any]:
-        content = context.get("fetched_content")
-        if not content:
-            return context
-
-        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-        output_file = os.path.join(self.output_dir, f"podcast_{timestamp}.wav")
-
-        try:
-            # Format content as a conversation
-            conversation = self._format_as_conversation(content)
-            
-            # Process each part of the conversation
-            audio_segments = []
-            
-            for i, part in enumerate(conversation):
-                print(f"Processing part {i+1}/{len(conversation)} - {part['speaker']} speaking...")
-                
-                # Generate speech for this part
-                gen_audio = self.tts.tts(
-                    text=part['text'],
-                    voice=part['voice'],
-                    preset=self.default_preset
-                )
-                
-                audio_segments.append(gen_audio)
-            
-            # Add transitions between speakers
-            audio_segments = self._add_transition_sound(audio_segments)
-            
-            # Combine all audio segments
-            combined_audio = torch.cat(audio_segments, dim=0)
-            
-            # Save the audio file
-            torchaudio.save(
-                output_file,
-                combined_audio.unsqueeze(0),
-                24000
-            )
-            
-            context["audio_output"] = output_file
-            print(f"Podcast-style audio file saved to: {output_file}")
-            
-        except Exception as e:
-            print(f"Error in text-to-speech conversion: {str(e)}")
-            context["audio_output"] = None
-
+        # Always call example.py and pass the input file as an argument
+        user_input = context.get('user_input', '')
+        os.system('python3 "' + os.path.join(os.path.dirname(__file__), 'example.py') + '" "' + str(user_input) + '"')
         return context
-
-    def set_voices(self, host_voice: str, guest_voice: str):
-        """
-        Set the voices for host and guest.
-        """
-        self.host_voice = host_voice
-        self.guest_voice = guest_voice
-
-    def set_preset(self, preset: str):
-        """
-        Set the quality preset for TTS generation.
-        """
-        valid_presets = ["ultra_fast", "fast", "standard", "high_quality"]
-        if preset in valid_presets:
-            self.default_preset = preset
-        else:
-            print(f"Preset {preset} not valid. Using default preset {self.default_preset}")
