@@ -10,6 +10,7 @@ from agents.agents import (
     VisualGenerationAgent,
     FormattingAgent,
     TTSAagent,
+    QuizAgent
 )
 class MultiAgentOrchestrator:
     """
@@ -27,6 +28,7 @@ class MultiAgentOrchestrator:
         self.visual_agent = VisualGenerationAgent()
         self.formatter = FormattingAgent()
         self.tts_agent = TTSAagent()
+        self.quiz_agent = QuizAgent()
 
     def run(self, user_input: Any, request_tts: bool = False) -> Dict[str, Any]:
         # Initialize context with user input
@@ -42,6 +44,12 @@ class MultiAgentOrchestrator:
             context = self.stt_agent(context)
 
         context = self.content_agent(context)
+        
+        if "quiz" in user_input.lower():
+            context = self.quiz_agent(context)
+            return {
+                "quiz_output": context.get("quiz_output", "Quiz could not be generated.")
+            }
 
         # Parse question and extract intent/entities
         context = self.query_agent(context)

@@ -1,6 +1,8 @@
 import os
 import re
 from openai import OpenAI
+from reportlab.lib.pagesizes import letter
+from reportlab.pdfgen import canvas
 
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY", ""))
 import requests
@@ -410,4 +412,71 @@ class TTSAagent:
                 "TTS requested, but no TTS engine is configured. "
                 "Please integrate a TTS provider (e.g. ElevenLabs or Amazon Polly) if you need audio output."
             )
+        return 
+    
+    
+class QuizAgent:
+    """
+    Generates a quiz (QA pairs, MCQs, HOTS, Situational) from fetched content or user query,
+    and saves it as a PDF.
+    """
+
+    def __init__(self, model: str = "gpt-3.5-turbo"):
+        self.model = model
+
+    def __call__(self, context: Dict[str, Any]) -> Dict[str, Any]:
+        content = context.get("fetched_content", "")
+        if not content or content.startswith("<") or content.strip() == "":
+            content = context.get("user_input", "")
+
+        if not content.strip():
+            context["quiz_output"] = "<No valid content to generate quiz.>"
+            return context
+
+        prompt = f"""
+From the following content, generate a structured quiz in this format:
+
+1. 10 Question–Answer Pairs
+2. 20 Multiple Choice Questions (4 options each, correct answer marked)
+3. 5 Higher-Order Thinking Questions with Answers 
+4. 5 Situational-Based Questions with Answers
+
+Content:
+{content}
+        """
+
+        try:
+            response = client.chat.completions.create(
+                model=self.model,
+                messages=[
+                    {"role": "system", "content": "You are a quiz creator for educational purposes."},
+                    {"role": "user", "content": prompt}
+                ],
+                temperature=0.4,
+                max_tokens=1500
+            )
+            quiz_text = response.choices[0].message.content.strip()
+
+            # Save to PDF
+            pdf_path = "quiz_output.pdf"
+            self._save_to_pdf(quiz_text, pdf_path)
+            context["quiz_output"] = f"✅ Quiz generated and saved to {pdf_path}"
+
+        except Exception as e:
+            context["quiz_output"] = f"<Quiz generation failed: {str(e)}>"
+
         return context
+
+    def _save_to_pdf(self, text: str, path: str):
+        c = canvas.Canvas(path, pagesize=letter)
+        width, height = letter
+        y = height - 40
+
+        for line in text.split("\n"):
+            c.drawString(40, y, line[:100])  
+            y -= 15
+            if y < 40:
+                c.showPage()
+                y = height - 40
+
+        c.save()

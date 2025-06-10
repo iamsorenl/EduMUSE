@@ -15,17 +15,21 @@ def main():
     result = orchestrator.run(args.input, request_tts=args.tts)
 
     # Print formatted response
-    print("Answer Text:")
-    print(result.get("answer_text", ""))
+    if result.get("quiz_output"):
+        print("\n📘 Quiz Output:")
+        print(result["quiz_output"])
+    else:
+        print("Answer Text:")
+        print(result.get("answer_text", ""))
 
-    visuals = result.get("visuals")
-    if visuals:
-        print("\nVisuals:")
-        print(visuals)
+        visuals = result.get("visuals")
+        if visuals:
+            print("\nVisuals:")
+            print(visuals)
 
-    if args.tts and result.get("audio_output"):
-        print("\nAudio Output:")
-        print(result.get("audio_output"))
-
+        if args.tts and result.get("audio_output"):
+            print("\nAudio Output:")
+            print(result.get("audio_output"))
+            
 if __name__ == "__main__":
     main()
