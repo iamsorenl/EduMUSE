@@ -1,6 +1,8 @@
 import os
 import io
 import sys
+import json
+import re
 from dotenv import load_dotenv
 from elevenlabs.client import ElevenLabs
 from elevenlabs import play
@@ -18,7 +20,6 @@ GUEST_VOICE_ID = "EXAVITQu4vr4xnSDxMaL"
 
 def safe_extract_text(pdf_path):
     if not os.path.isfile(pdf_path):
-        # Try to resolve relative to the script's directory
         script_dir = os.path.dirname(os.path.abspath(__file__))
         abs_path = os.path.join(script_dir, pdf_path)
         if os.path.isfile(abs_path):
@@ -27,18 +28,18 @@ def safe_extract_text(pdf_path):
             raise FileNotFoundError(f"PDF file not found: {pdf_path}")
     return extract_text(pdf_path)
 
-# Helper to call OpenAI and get podcast-style conversation
-def generate_podcast_dialogue(pdf_text):
+def generate_podcast_dialogue(text_input):
     prompt = (
-        "You are a podcast script writer. Given the following document text, "
+        "You are a podcast script writer. Given the following content, "
         "generate a podcast-style conversation between a Host and a Guest. "
-        "The conversation should be informative, engaging, and cover the main points of the document. "
-        f"Use this exact format for each turn: {{'speaker': 'Host' or 'Guest', 'text': '...', 'voice_id': '{HOST_VOICE_ID}' or '{GUEST_VOICE_ID}'}}. "
-        f"Use '{HOST_VOICE_ID}' for Host and '{GUEST_VOICE_ID}' for Guest. "
-        "Return a Python list of such dictionaries, no extra text.\n\n"
-        f"Document:\n{pdf_text[:3000]}\n\n"
+        "The conversation should be informative, engaging, and cover the main points. "
+        f"Return a **valid JSON list** of dictionaries. Each dictionary must have keys: 'speaker', 'text', 'voice_id'. "
+        f"Use this voice_id for Host: {HOST_VOICE_ID}, and this for Guest: {GUEST_VOICE_ID}. "
+        "Use only double quotes (\") for all keys and values. Do not wrap the output in markdown or code blocks.\n\n"
+        f"Content:\n{text_input[:3000]}\n\n"
         "Podcast Dialogue:"
     )
+
     response = openai_client.chat.completions.create(
         model="gpt-3.5-turbo",
         messages=[
@@ -48,35 +49,44 @@ def generate_podcast_dialogue(pdf_text):
         temperature=0.5,
         max_tokens=1500,
     )
-    import json
-    import re
+
     try:
         raw_output = response.choices[0].message.content.strip()
-        match = re.search(r"dialogue\s*=\s*(\[\s*{.*?}\s*\])", raw_output, re.DOTALL)
-        if match:
-            parsed_list = json.loads(match.group(1).replace("'", '"'))
-            return parsed_list
-        else:
-            raise ValueError("No valid dialogue list found in output.")
+
+        # Remove ``` or ```json wrappers if present
+        if raw_output.startswith("```"):
+            raw_output = raw_output.strip("`").strip()
+            if raw_output.lower().startswith("json"):
+                raw_output = raw_output[len("json"):].strip()
+
+        parsed_list = json.loads(raw_output)
+        return parsed_list
+
     except Exception as e:
-        print("⚠️ Could not parse OpenAI output. Raw output:")
+        print("\n⚠️ Could not parse OpenAI output. Raw output:")
         print(response.choices[0].message.content.strip())
-        print(f"Error: {e}")
+        print(f"Error: {e}\n")
         return [
             {"speaker": "Host", "text": "Sorry, could not parse podcast dialogue.", "voice_id": HOST_VOICE_ID},
-            {"speaker": "Guest", "text": "Please check the prompt or formatting of the response.", "voice_id": GUEST_VOICE_ID},
+            {"speaker": "Guest", "text": "Please check the formatting or prompt.", "voice_id": GUEST_VOICE_ID},
         ]
 
-# Main logic
+# === Main Script ===
 if len(sys.argv) > 1:
-    pdf_path = sys.argv[1]
-    print(f"PDF argument received: {pdf_path}")
-    # Extract text from PDF (robust path)
-    pdf_text = safe_extract_text(pdf_path)
-    # Generate podcast dialogue using OpenAI
-    dialogue = generate_podcast_dialogue(pdf_text)
+    input_arg = sys.argv[1]
+    print(f"\nInput received: {input_arg}")
+
+    if os.path.exists(input_arg) and input_arg.lower().endswith(".pdf"):
+        print("Treating input as a PDF file.")
+        text_input = safe_extract_text(input_arg)
+    else:
+        print("Treating input as plain text.")
+        text_input = input_arg
+
+    dialogue = generate_podcast_dialogue(text_input)
+
 else:
-    # Default fallback dialogue
+    print("⚠️ No input provided. Using fallback dialogue.")
     dialogue = [
         {"speaker": "Host", "text": "Welcome to the EduMUSE podcast. Today we're diving into one of the coolest applications of AI – planning your dream vacation using large language models.", "voice_id": HOST_VOICE_ID},
         {"speaker": "Guest", "text": "Thanks for having me! I'm thrilled to talk about our project – an AI-powered travel planning agent built at UC Santa Cruz.", "voice_id": GUEST_VOICE_ID},
@@ -100,6 +110,7 @@ else:
 
 segments = []
 for i, line in enumerate(dialogue):
+    print(f"🔊 {line['speaker']}: {line['text']}")
     audio = client.text_to_speech.convert(
         text=line["text"],
         voice_id=line["voice_id"],
@@ -109,9 +120,12 @@ for i, line in enumerate(dialogue):
     audio_bytes = b"".join(chunk for chunk in audio)
     segments.append(AudioSegment.from_file(io.BytesIO(audio_bytes), format="mp3"))
 
-# Combine all audio segments into one
+# Combine audio and export
 final_audio = sum(segments)
-final_audio.export("dialogue_podcast.mp3", format="mp3")
+output_path = "dialogue_podcast.mp3"
+final_audio.export(output_path, format="mp3")
 
-# Optional: play the result
-play(open("dialogue_podcast.mp3", "rb").read())
+print(f"\nPodcast generated and saved as {output_path}")
+
+# Optional: play audio (requires ffmpeg installed)
+# play(open("dialogue_podcast.mp3", "rb").read())
