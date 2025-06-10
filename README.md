@@ -34,11 +34,13 @@ EduMUSE Platform
 git clone <your-repo-url>
 cd EduMUSE
 
-# Create environment file
-cp .env.example .env
+# Create environment file (or use existing .env)
+touch .env  # if .env doesn't exist
 ```
 
 ### 2. Add API Keys to `.env`
+
+Your `.env` file should contain:
 
 ```bash
 MODEL=gpt-4o
@@ -92,7 +94,8 @@ python file_upload.py
 
 ```bash
 cd edumuse
-python src/edumuse/main.py
+crewai run
+# Alternative: python src/edumuse/main.py
 ```
 
 ### Terminal 3: Frontend Development Server
@@ -253,8 +256,9 @@ python test_knowledge_retrieval.py
 
 - Complete React frontend with PDF viewer and Material-UI
 - Working Flask file upload service with CORS
-- CrewAI knowledge system with multiple retrieval flows
+- **Functional CrewAI system generating educational content**
 - Comprehensive evaluation and testing framework
+- **Mock flow implementations ready for real AI integration**
 
 ### In Progress 🔄
 
@@ -301,4 +305,31 @@ cd Frontend && npm run dev                      # Terminal 3 (React)
 
 # Access application
 open http://localhost:5173
+```
+
+### Generated Content Examples
+
+Recent CrewAI runs generate structured educational content:
+
+- `educational_content_[timestamp].json` - Complete flow results with metadata
+- `quiz_output_[timestamp].md` - Educational quiz content
+- `summary_output_[timestamp].md` - Summary and analysis outputs
+
+Example from recent run:
+
+```json
+{
+  "topic": "machine learning neural networks",
+  "educational_content": {
+    "quiz": {
+      "type": "quiz",
+      "content": "Mock quiz output - flow not implemented yet"
+    },
+    "summary": {
+      "type": "summary",
+      "content": "Mock summary output - flow not implemented yet"
+    }
+  },
+  "metadata": { "source_count": 1, "flows_executed": ["quiz", "summary"] }
+}
 ```
