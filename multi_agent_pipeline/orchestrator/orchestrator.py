@@ -9,7 +9,7 @@ from agents.agents import (
     VerificationAgent,
     VisualGenerationAgent,
     FormattingAgent,
-    TTSAagent,
+    TTSAgent,
 )
 class MultiAgentOrchestrator:
     """
@@ -26,14 +26,21 @@ class MultiAgentOrchestrator:
         self.verifier = VerificationAgent()
         self.visual_agent = VisualGenerationAgent()
         self.formatter = FormattingAgent()
-        self.tts_agent = TTSAagent()
+        self.tts_agent = TTSAgent()
 
-    def run(self, user_input: Any, request_tts: bool = False) -> Dict[str, Any]:
+    def run(self, user_input: Any, request_tts: bool = False, 
+            host_voice: str = "tom", guest_voice: str = "emma", 
+            preset: str = "fast") -> Dict[str, Any]:
         # Initialize context with user input
         context: Dict[str, Any] = {
             "user_input": user_input,
             "request_tts": request_tts,
         }
+
+        # Set TTS parameters if requested
+        if request_tts:
+            self.tts_agent.set_voices(host_voice, guest_voice)
+            self.tts_agent.set_preset(preset)
 
         # Detect input type
         context = self.input_detector(context)

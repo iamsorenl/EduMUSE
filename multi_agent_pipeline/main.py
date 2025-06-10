@@ -9,10 +9,29 @@ def main():
     parser.add_argument(
         "--tts", action="store_true", help="Whether to synthesize speech output"
     )
+    parser.add_argument(
+        "--host-voice", default="tom", 
+        help="Voice to use for the host (options: tom, emma, daniel, william, sarah, olivia, charlotte, matthew, james, michelle)"
+    )
+    parser.add_argument(
+        "--guest-voice", default="emma",
+        help="Voice to use for the guest (options: tom, emma, daniel, william, sarah, olivia, charlotte, matthew, james, michelle)"
+    )
+    parser.add_argument(
+        "--preset", "-p", default="fast",
+        choices=["ultra_fast", "fast", "standard", "high_quality"],
+        help="Quality preset for TTS generation"
+    )
     args = parser.parse_args()
 
     orchestrator = MultiAgentOrchestrator()
-    result = orchestrator.run(args.input, request_tts=args.tts)
+    result = orchestrator.run(
+        args.input, 
+        request_tts=args.tts,
+        host_voice=args.host_voice,
+        guest_voice=args.guest_voice,
+        preset=args.preset
+    )
 
     # Print formatted response
     print("Answer Text:")

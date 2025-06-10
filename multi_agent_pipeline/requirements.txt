@@ -5,3 +5,7 @@ pdfminer.six
 beautifulsoup4
 requests
 numpy
+gTTS
+torch
+torchaudio
+tortoise-tts
