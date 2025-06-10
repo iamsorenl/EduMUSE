@@ -1,0 +1,207 @@
+# COPY CONTENT FROM assessment_tasks.yaml ARTIFACT
+# Task configurations for Assessment Flow
+question_design_task:
+  description: |
+    Design {num_questions} high-quality assessment questions about '{topic}' based on the provided academic sources.
+    
+    **Question Distribution Requirements**:
+    
+    1. **Question Types**:
+       - Multiple Choice: {mc_count} questions (4 options each)
+       - Short Answer: {sa_count} questions (2-3 sentence responses)
+       - Essay/Long Answer: {essay_count} questions (paragraph+ responses)
+    
+    2. **Cognitive Level Distribution** (Bloom's Taxonomy):
+       - Remember (recall facts): 20% of questions
+       - Understand (explain concepts): 20% of questions
+       - Apply (use in new situations): 25% of questions
+       - Analyze (break down, compare): 20% of questions
+       - Evaluate (judge, critique): 10% of questions
+       - Create (design, construct): 5% of questions
+    
+    3. **Question Design Standards**:
+       - Clear, unambiguous wording free of double negatives
+       - Test understanding, not reading comprehension
+       - Culturally neutral and inclusive language
+       - No trick questions or gotchas
+       - Progressive difficulty within each type
+       - Cover key concepts proportionally
+    
+    4. **For Each Question, Provide**:
+       - Question number and text
+       - Question type (MC/SA/Essay)
+       - Cognitive level targeted
+       - Concept(s) being tested
+       - Estimated difficulty (Easy/Medium/Hard)
+       - Time estimate for completion
+    
+    Base questions on these sources:
+    {sources}
+    
+    Ensure questions comprehensively assess understanding of the material.
+  expected_output: |
+    A complete set of {num_questions} assessment questions formatted as:
+    
+    Question 1: [Multiple Choice - Understand - Medium]
+    Concept: [Core concept being tested]
+    Time: 1-2 minutes
+    
+    [Clear question text]
+    A) [Option A]
+    B) [Option B]
+    C) [Option C]
+    D) [Option D]
+    
+    Question 2: [Short Answer - Apply - Medium]
+    Concept: [Core concept being tested]
+    Time: 3-4 minutes
+    
+    [Clear question prompt requiring 2-3 sentence response]
+    
+    [Continue for all questions with appropriate formatting]
+  agent: question_designer
+
+answer_validation_task:
+  description: |
+    Create comprehensive answer keys and assessment materials for all {num_questions} questions.
+    
+    **For Multiple Choice Questions**:
+    1. Clearly mark the correct answer
+    2. Explain why the correct answer is right
+    3. Explain why each distractor is wrong
+    4. Note common misconceptions addressed
+    5. Provide learning tips for the concept
+    
+    **For Short Answer Questions**:
+    1. Provide ideal model answer (2-3 sentences)
+    2. List key points that must be included (partial credit)
+    3. Create scoring rubric:
+       - 3 points: Complete, accurate answer with all key points
+       - 2 points: Mostly correct with minor omissions
+       - 1 point: Partially correct or major omissions
+       - 0 points: Incorrect or no relevant content
+    4. Note acceptable answer variations
+    5. Common errors to watch for
+    
+    **For Essay Questions**:
+    1. Create detailed scoring rubric with criteria:
+       - Content accuracy and completeness (40%)
+       - Analysis and critical thinking (30%)
+       - Use of examples/evidence (20%)
+       - Organization and clarity (10%)
+    2. Provide exemplar response outline
+    3. List required elements for full credit
+    4. Describe levels of performance (Excellent/Good/Satisfactory/Needs Improvement)
+    5. Sample strong response excerpts
+    
+    **Additional Requirements**:
+    - Reference specific source material for each answer
+    - Include educational explanations that teach, not just evaluate
+    - Suggest follow-up learning for incorrect answers
+    - Ensure all answers are factually accurate and up-to-date
+  expected_output: |
+    Complete answer key and assessment guide containing:
+    
+    === ANSWER KEY AND RUBRICS ===
+    
+    Question 1 Answer:
+    Correct Answer: [Letter]
+    Explanation: [Why this is correct]
+    Why other options are incorrect:
+    - A: [Explanation if not correct]
+    - B: [Explanation if not correct]
+    - C: [Explanation if not correct]
+    - D: [Explanation if not correct]
+    Learning Note: [Concept reinforcement]
+    
+    Question 2 Answer:
+    Model Response: [2-3 sentence ideal answer]
+    Key Points Required:
+    • [Point 1]
+    • [Point 2]
+    • [Point 3]
+    Rubric: [0-3 point scale with descriptions]
+    Common Errors: [What to watch for]
+    
+    [Continue for all questions]
+    
+    === LEARNING FEEDBACK GUIDE ===
+    [Suggestions for using results to guide learning]
+  agent: answer_validator
+
+calibration_task:
+  description: |
+    Finalize the assessment for {user_level} learners with appropriate difficulty calibration and enhancements.
+    
+    **Calibration Tasks**:
+    
+    1. **Difficulty Review and Adjustment**:
+       - Verify each question matches intended difficulty
+       - Adjust vocabulary and complexity for {user_level}
+       - Ensure appropriate progression (easy → challenging)
+       - Balance question types and cognitive demands
+       - Check total time requirement is reasonable
+    
+    2. **Assessment Organization**:
+       - Sequence questions optimally:
+         * Start with 1-2 confidence builders
+         * Alternate question types if mixed format
+         * Place most challenging items in middle third
+         * End with moderate difficulty
+       - Group by topic or format based on assessment type
+       - Create clear section headers and transitions
+    
+    3. **Instructions and Formatting**:
+       - Write clear, student-friendly instructions
+       - Include time recommendations per section
+       - Format for easy reading and navigation
+       - Add point values for each question
+       - Create answer sheet template if needed
+    
+    4. **Learning Enhancement Features**:
+       - Pre-assessment preparation checklist
+       - Test-taking strategy reminders
+       - Self-check prompts before submission
+       - Post-assessment reflection questions
+       - Suggested study activities based on performance
+    
+    5. **Create Final Versions**:
+       - Student Version: Clean question-only format
+       - Instructor Version: Complete with answers/rubrics
+       - Quick Reference: Answer key summary
+       - Digital Version: Formatted for online delivery
+    
+    **Metadata to Include**:
+    - Total points possible
+    - Recommended time limit
+    - Passing score suggestion (e.g., 70%)
+    - Learning objectives alignment
+    - Prerequisite knowledge assumed
+  expected_output: |
+    Complete assessment package with:
+    
+    === STUDENT VERSION ===
+    [Assessment Title]
+    Time Limit: [X] minutes | Total Points: [X]
+    
+    Instructions: [Clear, friendly instructions]
+    
+    [All questions formatted cleanly without answers]
+    
+    === INSTRUCTOR VERSION ===
+    [Complete assessment with answers, rubrics, and teaching notes]
+    
+    === QUICK SCORING GUIDE ===
+    [Summary answer key and point allocations]
+    
+    === LEARNING ENHANCEMENTS ===
+    - Pre-assessment preparation tips
+    - Post-assessment reflection prompts
+    - Performance interpretation guide
+    - Suggested follow-up activities
+    
+    === ASSESSMENT METADATA ===
+    - Alignment with objectives
+    - Difficulty distribution
+    - Time and scoring guidelines
+  agent: difficulty_calibrator

@@ -1,0 +1,318 @@
+{
+  "summary_evaluations": [
+    {
+      "flow_name": "summary",
+      "topic": "machine learning fundamentals",
+      "user_level": "beginner",
+      "processing_time": 67.2072069644928,
+      "quality_scores": {
+        "clarity": 10.0,
+        "completeness": 9.899999999999999,
+        "level_appropriateness": 8.0,
+        "pedagogical_value": 8.4,
+        "structure": 6.0
+      },
+      "total_score": 8.66,
+      "content_length": 5441,
+      "features_delivered": [
+        "multi_level_summaries",
+        "glossary_included",
+        "key_takeaways",
+        "study_tips",
+        "learning_objectives"
+      ]
+    },
+    {
+      "flow_name": "summary",
+      "topic": "machine learning fundamentals",
+      "user_level": "intermediate",
+      "processing_time": 68.79363632202148,
+      "quality_scores": {
+        "clarity": 6.800000000000001,
+        "completeness": 6.6,
+        "level_appropriateness": 8.0,
+        "pedagogical_value": 8.4,
+        "structure": 6.0
+      },
+      "total_score": 7.2,
+      "content_length": 7171,
+      "features_delivered": [
+        "multi_level_summaries",
+        "glossary_included",
+        "key_takeaways",
+        "study_tips",
+        "learning_objectives"
+      ]
+    },
+    {
+      "flow_name": "summary",
+      "topic": "machine learning fundamentals",
+      "user_level": "advanced",
+      "processing_time": 65.56342911720276,
+      "quality_scores": {
+        "clarity": 3.6,
+        "completeness": 3.3,
+        "level_appropriateness": 8.0,
+        "pedagogical_value": 8.4,
+        "structure": 8.0
+      },
+      "total_score": 6.04,
+      "content_length": 3674,
+      "features_delivered": [
+        "multi_level_summaries",
+        "glossary_included",
+        "key_takeaways",
+        "study_tips",
+        "learning_objectives"
+      ]
+    },
+    {
+      "flow_name": "summary",
+      "topic": "quantum computing basics",
+      "user_level": "beginner",
+      "processing_time": 53.21053409576416,
+      "quality_scores": {
+        "clarity": 10.0,
+        "completeness": 6.6,
+        "level_appropriateness": 8.0,
+        "pedagogical_value": 8.4,
+        "structure": 8.0
+      },
+      "total_score": 8.3,
+      "content_length": 5077,
+      "features_delivered": [
+        "multi_level_summaries",
+        "glossary_included",
+        "key_takeaways",
+        "study_tips",
+        "learning_objectives"
+      ]
+    },
+    {
+      "flow_name": "summary",
+      "topic": "quantum computing basics",
+      "user_level": "intermediate",
+      "processing_time": 57.90627408027649,
+      "quality_scores": {
+        "clarity": 8.4,
+        "completeness": 3.3,
+        "level_appropriateness": 8.0,
+        "pedagogical_value": 8.4,
+        "structure": 6.0
+      },
+      "total_score": 6.94,
+      "content_length": 5112,
+      "features_delivered": [
+        "multi_level_summaries",
+        "glossary_included",
+        "key_takeaways",
+        "study_tips",
+        "learning_objectives"
+      ]
+    },
+    {
+      "flow_name": "summary",
+      "topic": "data structures and algorithms",
+      "user_level": "intermediate",
+      "processing_time": 64.21249198913574,
+      "quality_scores": {
+        "clarity": 8.4,
+        "completeness": 6.6,
+        "level_appropriateness": 8.0,
+        "pedagogical_value": 8.4,
+        "structure": 8.0
+      },
+      "total_score": 7.9,
+      "content_length": 5488,
+      "features_delivered": [
+        "multi_level_summaries",
+        "glossary_included",
+        "key_takeaways",
+        "study_tips",
+        "learning_objectives"
+      ]
+    },
+    {
+      "flow_name": "summary",
+      "topic": "data structures and algorithms",
+      "user_level": "advanced",
+      "processing_time": 61.53926420211792,
+      "quality_scores": {
+        "clarity": 5.2,
+        "completeness": 3.3,
+        "level_appropriateness": 8.0,
+        "pedagogical_value": 8.4,
+        "structure": 8.0
+      },
+      "total_score": 6.44,
+      "content_length": 4630,
+      "features_delivered": [
+        "multi_level_summaries",
+        "glossary_included",
+        "key_takeaways",
+        "study_tips",
+        "learning_objectives"
+      ]
+    }
+  ],
+  "assessment_evaluations": [
+    {
+      "flow_name": "assessment",
+      "topic": "machine learning fundamentals",
+      "user_level": "beginner",
+      "processing_time": 50.35303330421448,
+      "quality_scores": {
+        "question_quality": 8.4,
+        "cognitive_variety": 6.800000000000001,
+        "answer_accuracy": 10.0,
+        "difficulty_calibration": 5.0,
+        "educational_value": 8.0
+      },
+      "total_score": 7.83,
+      "num_questions": 8,
+      "features_delivered": [
+        "multiple_choice_questions",
+        "short_answer_questions",
+        "essay_questions",
+        "scoring_rubrics",
+        "answer_explanations"
+      ]
+    },
+    {
+      "flow_name": "assessment",
+      "topic": "machine learning fundamentals",
+      "user_level": "intermediate",
+      "processing_time": 60.03956723213196,
+      "quality_scores": {
+        "question_quality": 10.0,
+        "cognitive_variety": 8.4,
+        "answer_accuracy": 10.0,
+        "difficulty_calibration": 8.0,
+        "educational_value": 10.0
+      },
+      "total_score": 9.38,
+      "num_questions": 8,
+      "features_delivered": [
+        "multiple_choice_questions",
+        "short_answer_questions",
+        "essay_questions",
+        "scoring_rubrics",
+        "answer_explanations",
+        "learning_feedback"
+      ]
+    },
+    {
+      "flow_name": "assessment",
+      "topic": "machine learning fundamentals",
+      "user_level": "advanced",
+      "processing_time": 78.77061128616333,
+      "quality_scores": {
+        "question_quality": 8.4,
+        "cognitive_variety": 6.800000000000001,
+        "answer_accuracy": 10.0,
+        "difficulty_calibration": 8.0,
+        "educational_value": 8.0
+      },
+      "total_score": 8.280000000000001,
+      "num_questions": 8,
+      "features_delivered": [
+        "multiple_choice_questions",
+        "short_answer_questions",
+        "essay_questions",
+        "scoring_rubrics",
+        "answer_explanations"
+      ]
+    },
+    {
+      "flow_name": "assessment",
+      "topic": "quantum computing basics",
+      "user_level": "beginner",
+      "processing_time": 61.433279514312744,
+      "quality_scores": {
+        "question_quality": 8.4,
+        "cognitive_variety": 6.800000000000001,
+        "answer_accuracy": 10.0,
+        "difficulty_calibration": 8.0,
+        "educational_value": 10.0
+      },
+      "total_score": 8.58,
+      "num_questions": 8,
+      "features_delivered": [
+        "multiple_choice_questions",
+        "short_answer_questions",
+        "essay_questions",
+        "scoring_rubrics",
+        "answer_explanations",
+        "learning_feedback"
+      ]
+    },
+    {
+      "flow_name": "assessment",
+      "topic": "quantum computing basics",
+      "user_level": "intermediate",
+      "processing_time": 72.73058104515076,
+      "quality_scores": {
+        "question_quality": 6.800000000000001,
+        "cognitive_variety": 5.2,
+        "answer_accuracy": 10.0,
+        "difficulty_calibration": 8.0,
+        "educational_value": 8.0
+      },
+      "total_score": 7.48,
+      "num_questions": 8,
+      "features_delivered": [
+        "multiple_choice_questions",
+        "short_answer_questions",
+        "essay_questions",
+        "scoring_rubrics",
+        "answer_explanations"
+      ]
+    },
+    {
+      "flow_name": "assessment",
+      "topic": "data structures and algorithms",
+      "user_level": "intermediate",
+      "processing_time": 54.88456058502197,
+      "quality_scores": {
+        "question_quality": 8.4,
+        "cognitive_variety": 5.2,
+        "answer_accuracy": 10.0,
+        "difficulty_calibration": 8.0,
+        "educational_value": 10.0
+      },
+      "total_score": 8.26,
+      "num_questions": 8,
+      "features_delivered": [
+        "multiple_choice_questions",
+        "short_answer_questions",
+        "essay_questions",
+        "scoring_rubrics",
+        "answer_explanations",
+        "learning_feedback"
+      ]
+    },
+    {
+      "flow_name": "assessment",
+      "topic": "data structures and algorithms",
+      "user_level": "advanced",
+      "processing_time": 64.09167385101318,
+      "quality_scores": {
+        "question_quality": 8.4,
+        "cognitive_variety": 6.800000000000001,
+        "answer_accuracy": 10.0,
+        "difficulty_calibration": 8.0,
+        "educational_value": 10.0
+      },
+      "total_score": 8.58,
+      "num_questions": 8,
+      "features_delivered": [
+        "multiple_choice_questions",
+        "short_answer_questions",
+        "essay_questions",
+        "scoring_rubrics",
+        "answer_explanations",
+        "learning_feedback"
+      ]
+    }
+  ]
+}
