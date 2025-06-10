@@ -3,12 +3,14 @@ import {
   ButtonGroup,
   Button,
   Paper,
-  Fade
+  Fade,
+  Tooltip
 } from '@mui/material';
 import {
-  Summarize,
-  Quiz,
-  Search
+  Highlight,
+  Search,
+  Psychology,
+  Sync
 } from '@mui/icons-material';
 
 export default function PDFActionButtons({
@@ -30,30 +32,49 @@ export default function PDFActionButtons({
         }}
       >
         <ButtonGroup variant="contained" size="small">
-          <Button
-            startIcon={<Summarize />}
-            onClick={() => onAction('summarize')}
-            disabled={isLoading}
-            color="primary"
-          >
-            Summarize
-          </Button>
-          <Button
-            startIcon={<Quiz />}
-            onClick={() => onAction('quiz')}
-            disabled={isLoading}
-            color="success"
-          >
-            Quiz Me
-          </Button>
-          <Button
-            startIcon={<Search />}
-            onClick={() => onAction('search')}
-            disabled={isLoading}
-            color="secondary"
-          >
-            Search
-          </Button>
+          <Tooltip title="Just highlight this text without AI processing">
+            <Button
+              startIcon={<Highlight />}
+              onClick={() => onAction('highlight')}
+              disabled={isLoading}
+              color="warning"
+            >
+              Highlight
+            </Button>
+          </Tooltip>
+          
+          <Tooltip title="Search the web for information about this text">
+            <Button
+              startIcon={<Search />}
+              onClick={() => onAction('search')}
+              disabled={isLoading}
+              color="info"
+            >
+              Web Search
+            </Button>
+          </Tooltip>
+          
+          <Tooltip title="Use LLM to explain this concept">
+            <Button
+              startIcon={<Psychology />}
+              onClick={() => onAction('explain')}
+              disabled={isLoading}
+              color="primary"
+            >
+              LLM Explain
+            </Button>
+          </Tooltip>
+          
+          <Tooltip title="Use hybrid approach combining web search and LLM">
+            <Button
+              startIcon={<Sync />}
+              onClick={() => onAction('analyze')}
+              disabled={isLoading}
+              color="secondary"
+            >
+              Hybrid Analysis
+            </Button>
+          </Tooltip>
         </ButtonGroup>
       </Paper>
     </Fade>

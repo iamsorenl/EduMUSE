@@ -8,7 +8,7 @@ import {
   Tip,
 } from 'react-pdf-highlighter';
 import { Box, Typography, Button, ButtonGroup, Paper, Chip } from '@mui/material';
-import { Summarize, Quiz, Search, Psychology, Delete, Highlight as HighlightIcon } from '@mui/icons-material';
+import { Search, Psychology, Delete, Highlight as HighlightIcon, Sync } from '@mui/icons-material';
 
 // CrewAI Action Tip Component (with Highlight option)
 const CrewAITip = ({ onConfirm, onCancel }) => (
@@ -32,32 +32,25 @@ const CrewAITip = ({ onConfirm, onCancel }) => (
         Just Highlight
       </Button>
       <Button
-        startIcon={<Summarize />}
-        onClick={() => onConfirm({ text: 'summarize', emoji: '📝' })}
-        color="primary"
+        startIcon={<Search />}
+        onClick={() => onConfirm({ text: 'search', emoji: '🔍' })}
+        color="info"
       >
-        Summarize Text
+        Web Search
       </Button>
       <Button
         startIcon={<Psychology />}
         onClick={() => onConfirm({ text: 'explain', emoji: '🧠' })}
-        color="success"
+        color="primary"
       >
-        Explain Concept
+        LLM Explain
       </Button>
       <Button
-        startIcon={<Quiz />}
-        onClick={() => onConfirm({ text: 'quiz', emoji: '❓' })}
+        startIcon={<Sync />}
+        onClick={() => onConfirm({ text: 'analyze', emoji: '⚡' })}
         color="secondary"
       >
-        Generate Quiz
-      </Button>
-      <Button
-        startIcon={<Search />}
-        onClick={() => onConfirm({ text: 'analyze', emoji: '🔍' })}
-        color="info"
-      >
-        Deep Analysis
+        Hybrid Analysis
       </Button>
     </ButtonGroup>
 
@@ -88,10 +81,9 @@ const HighlightPopup = ({ comment, onAction, onDelete }) => (
     
     <ButtonGroup variant="outlined" size="small" orientation="vertical" fullWidth>
       <Button onClick={() => onAction('highlight')}>💡 Keep Highlighted</Button>
-      <Button onClick={() => onAction('summarize')}>📝 Summarize</Button>
-      <Button onClick={() => onAction('explain')}>🧠 Explain</Button>
-      <Button onClick={() => onAction('quiz')}>❓ Quiz</Button>
-      <Button onClick={() => onAction('analyze')}>🔍 Analyze</Button>
+      <Button onClick={() => onAction('search')}>🔍 Web Search</Button>
+      <Button onClick={() => onAction('explain')}>🧠 LLM Explain</Button>
+      <Button onClick={() => onAction('analyze')}>⚡ Hybrid Analysis</Button>
     </ButtonGroup>
     
     {onDelete && (
@@ -198,10 +190,9 @@ export default function DirectPDFViewer({
   const getActionEmoji = (action) => {
     switch (action) {
       case 'highlight': return '💡';
-      case 'summarize': return '📝';
+      case 'search': return '🔍';
       case 'explain': return '🧠';
-      case 'quiz': return '❓';
-      case 'analyze': return '🔍';
+      case 'analyze': return '⚡';
       default: return '🎯';
     }
   };

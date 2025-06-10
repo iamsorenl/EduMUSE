@@ -99,22 +99,36 @@ function App() {
       // Generate unique ID for this result
       const resultId = `result-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
       
-      // Simulate an API call with a timeout (mock results for now)
-      const response = await new Promise((resolve) => {
-        setTimeout(() => {
-          resolve({
-            id: resultId, // Add unique ID
-            action,
-            text: textToProcess.substring(0, 100) + (textToProcess.length > 100 ? '...' : ''),
-            data: `Mock ${action} result for: "${textToProcess.substring(0, 50)}${textToProcess.length > 50 ? '...' : ''}"`,
-            timestamp: new Date().toISOString(),
-            fullText: textToProcess // Keep the full text for reference
-          });
-        }, 2000);
+      // Make API call to the Flask server
+      const response = await fetch('http://127.0.0.1:5000/process', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          action,
+          text: textToProcess
+        }),
       });
+      
+      if (!response.ok) {
+        throw new Error(`API call failed with status: ${response.status}`);
+      }
+      
+      const data = await response.json();
+      
+      // Format the result for display
+      const formattedResult = {
+        id: resultId,
+        action,
+        text: textToProcess.substring(0, 100) + (textToProcess.length > 100 ? '...' : ''),
+        data: data.result.educational_content[data.result.metadata.flows_executed[0]],
+        timestamp: data.timestamp,
+        fullText: textToProcess // Keep the full text for reference
+      };
 
       // Add to results array instead of replacing
-      setResults(prev => [response, ...prev]); // Add newest first
+      setResults(prev => [formattedResult, ...prev]); // Add newest first
       setSelectedText(textToProcess); // Update selected text to show what was processed
       
     } catch (error) {
@@ -123,7 +137,7 @@ function App() {
         id: `error-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
         action,
         text: textToProcess.substring(0, 100) + (textToProcess.length > 100 ? '...' : ''),
-        error: 'Failed to process request',
+        error: `Failed to process request: ${error.message}`,
         timestamp: new Date().toISOString(),
       };
       setResults(prev => [errorResult, ...prev]);

@@ -14,16 +14,83 @@ import {
 } from '@mui/material';
 import { Psychology, CheckCircle, Clear, Close, DeleteOutline, ExpandMore, ExpandLess, HighlightOff } from '@mui/icons-material';
 
+// Helper function to format CrewAI results
+const formatResult = (data) => {
+  if (!data) {
+    return (
+      <Typography variant="body2" sx={{ fontSize: '0.85rem' }}>
+        No result data available
+      </Typography>
+    );
+  }
+
+  if (typeof data === 'string') {
+    return (
+      <Typography variant="body2" sx={{ fontSize: '0.85rem', whiteSpace: 'pre-wrap' }}>
+        {data}
+      </Typography>
+    );
+  }
+
+  // Handle structured data from CrewAI
+  if (typeof data === 'object') {
+    return (
+      <>
+        <Typography variant="subtitle2" color="primary" gutterBottom>
+          {data.flow_type || 'AI Analysis'}
+        </Typography>
+        
+        {data.topic && (
+          <Typography variant="body2" sx={{ mb: 1 }}>
+            <strong>Topic:</strong> {data.topic}
+          </Typography>
+        )}
+        
+        {data.retrieval_method && (
+          <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 1 }}>
+            Method: {data.retrieval_method}
+          </Typography>
+        )}
+        
+        {data.sources_found && (
+          <Box sx={{ mt: 1 }}>
+            <Typography variant="body2" sx={{ fontSize: '0.85rem', whiteSpace: 'pre-wrap' }}>
+              {data.sources_found}
+            </Typography>
+          </Box>
+        )}
+        
+        {/* Display metadata if available */}
+        {data.metadata && (
+          <Box sx={{ mt: 1, pt: 1, borderTop: '1px dashed rgba(0,0,0,0.1)' }}>
+            <Typography variant="caption" color="text.secondary" sx={{ display: 'block' }}>
+              <strong>Additional Info:</strong> {Object.keys(data.metadata).map(key => 
+                `${key}: ${typeof data.metadata[key] === 'object' ? JSON.stringify(data.metadata[key]) : data.metadata[key]}`
+              ).join(', ')}
+            </Typography>
+          </Box>
+        )}
+      </>
+    );
+  }
+
+  // Fallback for any other data type
+  return (
+    <Typography variant="body2" sx={{ fontSize: '0.85rem' }}>
+      {JSON.stringify(data, null, 2)}
+    </Typography>
+  );
+};
+
 // Individual Result Card Component
 const ResultCard = ({ result, onDelete, index }) => {
   const [expanded, setExpanded] = React.useState(index === 0); // First result expanded by default
 
   const getActionColor = (action) => {
     switch (action) {
-      case 'summarize': return 'primary';
-      case 'explain': return 'success';
-      case 'quiz': return 'secondary';
-      case 'analyze': return 'info';
+      case 'search': return 'info';
+      case 'explain': return 'primary';
+      case 'analyze': return 'secondary';
       case 'highlight': return 'warning';
       default: return 'default';
     }
@@ -31,10 +98,9 @@ const ResultCard = ({ result, onDelete, index }) => {
 
   const getActionIcon = (action) => {
     switch (action) {
-      case 'summarize': return '📝';
+      case 'search': return '🔍';
       case 'explain': return '🧠';
-      case 'quiz': return '❓';
-      case 'analyze': return '🔍';
+      case 'analyze': return '⚡';
       case 'highlight': return '💡';
       default: return '🤖';
     }
@@ -108,12 +174,13 @@ const ResultCard = ({ result, onDelete, index }) => {
               maxHeight: 200,
               overflow: 'auto'
             }}>
-              <Typography variant="body2" sx={{ fontSize: '0.85rem' }}>
-                {result.error ? 
-                  `Error: ${result.error}` : 
-                  (typeof result.data === 'string' ? result.data : JSON.stringify(result.data, null, 2))
-                }
-              </Typography>
+              {result.error ? (
+                <Typography variant="body2" color="error" sx={{ fontSize: '0.85rem' }}>
+                  Error: {result.error}
+                </Typography>
+              ) : (
+                formatResult(result.data)
+              )}
             </Box>
           </Box>
         </Collapse>
