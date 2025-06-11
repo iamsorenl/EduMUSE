@@ -4,35 +4,43 @@ import warnings
 from datetime import datetime
 from typing import List, Dict, Any
 
-from edumuse.crew import EduMUSE  # Changed from search_rec.crew import SearchRec
-from edumuse.flows.flow_registry import flow_registry
+# Ensure all flows are imported to register them with the flow_registry
+from crew import EduMUSE
+from flows.flow_registry import flow_registry
+from flows.web_search_flow import WebSearchFlow
+from flows.llm_knowledge_flow import LLMKnowledgeFlow
+from flows.hybrid_retrieval_flow import HybridRetrievalFlow
+from flows.assessment_flow import AssessmentFlow
+from flows.summary_flow import SummaryFlow
 
 warnings.filterwarnings("ignore", category=SyntaxWarning, module="pysbd")
 
 def run():
     """Run EduMUSE with educational content generation"""
     
-    topic = "machine learning neural networks"
-    requested_flows = ["quiz", "summary"]
+    topic = "the role of artificial intelligence in personalized education"
+    # Corrected 'quiz' to 'assessment' to match the registered flow
+    requested_flows = ["summary", "assessment"] 
     
     learning_context = {
         "user_level": "intermediate",
         "learning_objective": "understand practical applications",
-        "time_available": "30 minutes"
+        "time_available": "30 minutes",
+        "num_questions": 5 
     }
     
     try:
-        edumuse = EduMUSE()  # Changed from SearchRec()
-        result = edumuse.process_educational_request(  # Changed method name
+        edumuse = EduMUSE()
+        result = edumuse.process_educational_request(
             topic=topic,
             requested_flows=requested_flows,
             context=learning_context
         )
         
-        print("🎓 EduMUSE Educational Content Generated:")
-        print(f"📚 Topic: {result['topic']}")
-        print(f"🔍 Sources Found: {result['metadata']['source_count']}")
-        print(f"⚡ Flows Executed: {', '.join(result['metadata']['flows_executed'])}")
+        print("雌 EduMUSE Educational Content Generated:")
+        print(f"答 Topic: {result['topic']}")
+        print(f"剥 Sources Found: {result['metadata']['source_count']}")
+        print(f"笞｡ Flows Executed: {', '.join(result['metadata']['flows_executed'])}")
         
         _save_educational_content(result)
         
@@ -43,7 +51,7 @@ def train():
     """Train the EduMUSE crew"""
     inputs = {
         "topic": "educational technology",
-        "requested_flows": ["quiz", "summary"]
+        "requested_flows": ["summary", "assessment"]
     }
     try:
         EduMUSE().crew().train(n_iterations=int(sys.argv[1]), filename=sys.argv[2], inputs=inputs)
@@ -82,7 +90,9 @@ def _save_educational_content(result: Dict[str, Any]):
         with open(filename, "w") as f:
             f.write(f"# {flow_name.title()} Output\n\n")
             f.write(f"**Topic**: {result['topic']}\n\n")
-            f.write(str(flow_result))
+            # Get the main content from the 'sources_found' key for cleaner output
+            content = flow_result.get('sources_found', str(flow_result))
+            f.write(content)
 
 if __name__ == "__main__":
     run()

@@ -1,0 +1,51 @@
+{
+  "topic": "the role of artificial intelligence in personalized education",
+  "sources": [
+    {
+      "title": "the role of artificial intelligence in personalized education",
+      "url": "localfile://the_role_of_artificial_intelligence_in_personalized_education",
+      "content": "",
+      "source_type": "uploaded_document"
+    }
+  ],
+  "educational_content": {
+    "summary": {
+      "type": "summary",
+      "content": "Mock summary output - flow not implemented yet",
+      "sources_used": 1,
+      "context": {
+        "topic": "the role of artificial intelligence in personalized education",
+        "user_level": "intermediate",
+        "learning_objective": "understand practical applications",
+        "time_available": "30 minutes",
+        "num_questions": 5
+      }
+    },
+    "assessment": {
+      "type": "assessment",
+      "content": "Mock assessment output - flow not implemented yet",
+      "sources_used": 1,
+      "context": {
+        "topic": "the role of artificial intelligence in personalized education",
+        "user_level": "intermediate",
+        "learning_objective": "understand practical applications",
+        "time_available": "30 minutes",
+        "num_questions": 5
+      }
+    }
+  },
+  "metadata": {
+    "flows_executed": [
+      "summary",
+      "assessment"
+    ],
+    "source_count": 1,
+    "learning_context": {
+      "user_level": "intermediate",
+      "learning_objective": "understand practical applications",
+      "time_available": "30 minutes",
+      "num_questions": 5
+    },
+    "execution_method": "direct_flow_execution"
+  }
+}
