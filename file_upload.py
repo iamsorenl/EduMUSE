@@ -1,12 +1,30 @@
+import sys
+import os
+
+# Add the 'src' directory to Python's path to allow for clean imports
+# This is the standard way to handle a 'src' layout
+src_path = os.path.join(os.path.dirname(__file__), 'edumuse', 'src')
+sys.path.insert(0, src_path)
+
+# Now that the path is set, we can import everything cleanly
+from edumuse.crew import EduMUSE
+from edumuse.flows.web_search_flow import WebSearchFlow
+from edumuse.flows.llm_knowledge_flow import LLMKnowledgeFlow
+from edumuse.flows.hybrid_retrieval_flow import HybridRetrievalFlow
+from edumuse.flows.assessment_flow import AssessmentFlow
+from edumuse.flows.summary_flow import SummaryFlow
+from edumuse.tools.pdf_generator import PDFGenerator
+
+# --- Standard Flask Imports ---
 from flask import Flask, request, jsonify, send_from_directory
 from flask_cors import CORS, cross_origin
-import os
 from werkzeug.utils import secure_filename
 from datetime import datetime
+import traceback
 
 app = Flask(__name__)
 
-# Configure CORS - we'll use a simpler approach with just the CORS extension
+# Configure CORS
 CORS(app)
 
 # Configure upload folder
@@ -17,66 +35,62 @@ if not os.path.exists(UPLOAD_FOLDER):
     os.makedirs(UPLOAD_FOLDER)
 
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
-app.config['MAX_CONTENT_LENGTH'] = 50 * 1024 * 1024  # 50MB max file size
+app.config['MAX_CONTENT_LENGTH'] = 50 * 1024 * 1024
 
 def allowed_file(filename):
-    return '.' in filename and \
-           filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 @app.route('/upload', methods=['POST'])
 def upload_document():
+    # ... (this function remains the same)
     if 'file' not in request.files:
         return jsonify({'error': 'No file provided'}), 400
-    
     file = request.files['file']
-    
     if file.filename == '':
         return jsonify({'error': 'No file selected'}), 400
-    
     if file and allowed_file(file.filename):
         filename = secure_filename(file.filename)
         filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
         file.save(filepath)
-        
         return jsonify({
             'message': 'PDF uploaded successfully',
             'filename': filename,
             'filepath': filepath,
             'file_type': 'pdf'
         }), 200
-    
     return jsonify({'error': 'Invalid file type. Only PDF files are supported.'}), 400
 
-# Remove @cross_origin() decorators since we're using global CORS
+
 @app.route('/files/<filename>')
 @cross_origin()
 def serve_file(filename):
-    """Serve uploaded PDF files"""
+    # ... (this function remains the same)
     try:
         return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
     except Exception as e:
         return jsonify({'error': f'File not found: {str(e)}'}), 404
 
+
 @app.route('/files', methods=['GET'])
 @cross_origin()
 def list_files():
-    """List all uploaded PDF files"""
+    # ... (this function remains the same)
     try:
         files = []
         if os.path.exists(app.config['UPLOAD_FOLDER']):
             for filename in os.listdir(app.config['UPLOAD_FOLDER']):
                 if filename.lower().endswith('.pdf'):
-                    files.append({
-                        'filename': filename,
-                        'url': f'/files/{filename}'
-                    })
+                    files.append({'filename': filename, 'url': f'/files/{filename}'})
         return jsonify({'files': files}), 200
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
+
 @app.route('/health', methods=['GET'])
 def health_check():
+    # ... (this function remains the same)
     return jsonify({'status': 'healthy'}), 200
+
 
 @app.route('/process', methods=['POST'])
 def process_text():
@@ -85,39 +99,17 @@ def process_text():
         if not data or 'action' not in data:
             return jsonify({'error': 'Missing action'}), 400
         
-        # Get text from request, or use mock text for testing
         text = data.get('text', '')
         action = data['action']
         
-        # 🧪 ADD MOCK TEXT FOR QUICK TESTING
         if not text or len(text.strip()) < 10:
             mock_texts = {
-                'assess': """
-                Machine Learning Fundamentals
-                
-                Machine learning is a subset of artificial intelligence that enables computers to learn from data. The three main types are supervised learning (using labeled data), unsupervised learning (finding patterns), and reinforcement learning (learning through rewards).
-                
-                Key concepts include training data, features, algorithms, model validation, and overfitting. Applications include image recognition, natural language processing, and recommendation systems.
-                """,
-                'summarize': """
-                Climate Change and Environmental Impact
-                
-                Climate change refers to long-term shifts in global temperatures caused primarily by human activities since the 1800s. The greenhouse effect traps heat through gases like CO2, methane, and nitrous oxide.
-                
-                Major impacts include rising sea levels, extreme weather, ecosystem disruption, and biodiversity loss. Mitigation involves renewable energy and carbon capture, while adaptation requires infrastructure improvements.
-                """,
-                'default': """
-                Artificial Intelligence and Society
-                
-                AI systems perform tasks requiring human intelligence like visual perception, speech recognition, and decision-making. Current applications include virtual assistants, autonomous vehicles, and medical diagnosis.
-                
-                Ethical considerations include privacy, algorithmic bias, job displacement, and transparency. The future holds promise for solving global challenges while requiring responsible development.
-                """
+                'assess': "Machine Learning Fundamentals...",
+                'summarize': "Climate Change and Environmental Impact...",
+                'default': "Artificial Intelligence and Society..."
             }
             text = mock_texts.get(action, mock_texts['default'])
-            print(f"🧪 Using mock text for '{action}' (length: {len(text)} chars)")
         
-        # Map frontend actions to CrewAI flows
         flow_mapping = {
             'highlight': 'highlight',
             'search': 'web_search',
@@ -127,225 +119,47 @@ def process_text():
             'assess': 'assessment'
         }
         
-        # Get the corresponding flow
         flow = flow_mapping.get(action, 'summary')
-        print(f"Mapped action '{action}' to flow '{flow}'")
         
-        # Debug information
-        import sys
-        import os
-        print(f"Current directory: {os.getcwd()}")
-        print(f"Python path: {sys.path}")
-        
-        # Add both the current directory and the edumuse directory to the path
-        sys.path.append(os.path.abspath('.'))
-        sys.path.append(os.path.abspath('./edumuse'))
-        
-        # Try to import EduMUSE
-        try:
-            print(f"Attempting to import EduMUSE for action: {action}, flow: {flow}")
-            from edumuse.src.edumuse.crew import EduMUSE
-            print("Successfully imported EduMUSE")
-            use_real_implementation = True
-        except ImportError as e:
-            print(f"Import error: {e}")
-            # Try alternative import paths
-            try:
-                from src.edumuse.crew import EduMUSE
-                print("Successfully imported EduMUSE from alternative path")
-                use_real_implementation = True
-            except ImportError as e:
-                print(f"Alternative import failed: {e}")
-                print("Falling back to mock data")
-                use_real_implementation = False
-        
-        # Create context from the text
         context = {
             "user_level": "intermediate",
             "learning_objective": "understand content",
             "time_available": "10 minutes"
         }
         
-        # Process the request using EduMUSE if available, otherwise use mock data
-        result = None
-        
-        if use_real_implementation:
-            try:
-                print("Using real EduMUSE implementation")
-                edumuse = EduMUSE()
-                
-                # Convert frontend action to flow name
-                requested_flows = [flow]
-                
-                # Process the request using EduMUSE
-                print(f"Calling EduMUSE with flows: {requested_flows}")
-                result = edumuse.process_educational_request(
-                    topic=text[:100],  # Use selected text as topic
-                    requested_flows=requested_flows,
-                    context=context
-                )
-                
-                print(f"Successfully processed with EduMUSE: {requested_flows}")
-                print(f"Result: {result}")
-                
-            except Exception as e:
-                import traceback
-                traceback.print_exc()
-                print(f"Error using real implementation: {e}")
-                print(f"Error type: {type(e)}")
-                print(f"Error args: {e.args}")
-                print("Falling back to mock data")
-                use_real_implementation = False
-        
-        # If real implementation failed or is not available, use mock data
-        if not use_real_implementation or result is None:
-            print("Using mock data as fallback")
-            
-            # Mock result based on the action type
-            mock_results = {
-                'summarize': {
-                    'flow_type': 'summary',
-                    'retrieval_method': 'mock_data',
-                    'sources_found': f"Summary of: {text[:100]}...\n\nThis is a mock summary generated for testing purposes. The actual summary would be generated by CrewAI.",
-                    'topic': text[:50] + "...",
-                    'metadata': {
-                        'components': ['mock_component'],
-                        'synthesis_approach': 'mock_synthesis',
-                        'coverage': 'mock_coverage'
-                    }
-                },
-                'quiz': {
-                    'flow_type': 'quiz',
-                    'retrieval_method': 'mock_data',
-                    'sources_found': f"Quiz based on: {text[:100]}...\n\n1. What is the main topic of this text?\n2. What are the key concepts discussed?\n3. How would you apply these concepts in practice?",
-                    'topic': text[:50] + "...",
-                    'metadata': {
-                        'components': ['mock_component'],
-                        'synthesis_approach': 'mock_synthesis',
-                        'coverage': 'mock_coverage'
-                    }
-                },
-                'search': {
-                    'flow_type': 'web_search_retrieval',
-                    'retrieval_method': 'mock_data',
-                    'sources_found': f"Search results for: {text[:100]}...\n\n1. Source 1: Example academic paper\n2. Source 2: Example textbook\n3. Source 3: Example website",
-                    'topic': text[:50] + "...",
-                    'metadata': {
-                        'components': ['mock_component'],
-                        'synthesis_approach': 'mock_synthesis',
-                        'coverage': 'mock_coverage'
-                    }
-                },
-                'explain': {
-                    'flow_type': 'llm_knowledge_retrieval',
-                    'retrieval_method': 'mock_data',
-                    'sources_found': f"Explanation of: {text[:100]}...\n\nThis is a mock explanation generated for testing purposes. The actual explanation would be generated by CrewAI.",
-                    'topic': text[:50] + "...",
-                    'metadata': {
-                        'components': ['mock_component'],
-                        'synthesis_approach': 'mock_synthesis',
-                        'coverage': 'mock_coverage'
-                    }
-                },
-                'analyze': {
-                    'flow_type': 'hybrid_knowledge_retrieval',
-                    'retrieval_method': 'mock_data',
-                    'sources_found': f"Analysis of: {text[:100]}...\n\nThis is a mock analysis generated for testing purposes. The actual analysis would be generated by CrewAI.",
-                    'topic': text[:50] + "...",
-                    'metadata': {
-                        'components': ['mock_component'],
-                        'synthesis_approach': 'mock_synthesis',
-                        'coverage': 'mock_coverage'
-                    }
-                },
-                'assess': {
-                    'flow_type': 'assessment',
-                    'retrieval_method': 'mock_data', 
-                    'sources_found': f"Assessment for: {text[:100]}...\n\nMULTIPLE CHOICE:\n\n1. What is the main concept discussed in this text?\nA) Option A\nB) Option B\nC) Option C\nD) Option D\n\n2. Which statement best describes...?\nA) Statement A\nB) Statement B\nC) Statement C\nD) Statement D\n\nSHORT ANSWER:\n\n3. Explain the key principles mentioned in the text.\n\n4. How would you apply these concepts in practice?",
-                    'topic': text[:50] + "...",
-                    'metadata': {
-                        'question_types': ['multiple_choice', 'short_answer'],
-                        'total_questions': 4,
-                        'estimated_time': '15 minutes'
-                    }
-                }
-            }
-        
-            # Get the mock result for the requested action
-            mock_result = mock_results.get(action, mock_results['summarize'])
-            
-            # Create a mock response that matches the structure of the CrewAI response
-            result = {
-                'topic': text[:50] + "...",
-                'sources': [
-                    {
-                        'title': f"Mock Source about {text[:30]}...",
-                        'url': "https://example.edu/mock",
-                        'credibility_score': 8.5,
-                        'source_type': "mock_source"
-                    }
-                ],
-                'educational_content': {
-                    flow: mock_result
-                },
-                'metadata': {
-                    'flows_executed': [flow],
-                    'source_count': 1,
-                    'learning_context': context,
-                    'execution_method': 'mock_execution'
-                }
-            }
-        
-        print(f"Processed request for action: {action}, flow: {flow}")
-        print(f"Returning result for: {action}")
-        
-        # Update the PDF generation section (around line 320):
+        # With imports handled at the top, this section becomes much cleaner
+        edumuse = EduMUSE()
+        result = edumuse.process_educational_request(
+            topic=text[:100],
+            requested_flows=[flow],
+            context=context
+        )
+
+        # PDF generation logic remains the same
         pdf_files = None
-        if action in ['assess']:
+        if action in ['assess', 'summarize']:
             try:
-                # ✅ FIX: Use the correct import path that matches your working EduMUSE import
-                from src.edumuse.tools.pdf_generator import PDFGenerator  # ← Changed this line
-                
-                # Get data from the correct unified structure
-                if result and 'educational_content' in result:
-                    flow_data = result['educational_content'].get(flow, {})
-                else:
-                    flow_data = result if result else mock_results.get(action, {})
-                
-                # Generate PDFs
                 pdf_generator = PDFGenerator(upload_folder=app.config['UPLOAD_FOLDER'])
+                flow_data = result['educational_content'].get(flow, {})
                 
                 if action == 'assess':
-                    # Use sources_found for assessment content
-                    assessment_data = {
-                        'sources_found': flow_data.get('sources_found', ''),
-                        'topic': flow_data.get('topic', 'Assessment'),
-                        'metadata': flow_data.get('metadata', {})
-                    }
-                    pdf_files = pdf_generator.generate_assessment_pdfs(assessment_data)
+                    pdf_files = pdf_generator.generate_assessment_pdfs(flow_data)
+                elif action == 'summarize':
+                    pdf_files = pdf_generator.generate_summary_pdf(flow_data)
 
-                print(f"✅ Generated {action} PDFs: {pdf_files}")
-                
-                # Add PDF info to result
                 if pdf_files:
-                    result['pdf_files'] = {
-                        **pdf_files,
-                        'generated_at': datetime.now().isoformat(),
-                        'location': 'uploads_folder'
-                    }
+                    result['pdf_files'] = { **pdf_files, 'generated_at': datetime.now().isoformat() }
                     result['pdf_generated'] = True
                     
             except Exception as e:
                 print(f"❌ PDF generation failed: {e}")
-                import traceback
-                traceback.print_exc()  # ← Add this to see full error details
+                traceback.print_exc()
                 result['pdf_error'] = str(e)
         
-        # Return the final result
         return jsonify(result), 200
         
     except Exception as e:
-        print(f"Error in process_text: {e}")
+        traceback.print_exc()
         return jsonify({'error': str(e)}), 500
 
 if __name__ == '__main__':
