@@ -82,11 +82,40 @@ def health_check():
 def process_text():
     try:
         data = request.json
-        if not data or 'text' not in data or 'action' not in data:
-            return jsonify({'error': 'Missing text or action'}), 400
+        if not data or 'action' not in data:
+            return jsonify({'error': 'Missing action'}), 400
         
-        text = data['text']
+        # Get text from request, or use mock text for testing
+        text = data.get('text', '')
         action = data['action']
+        
+        # 🧪 ADD MOCK TEXT FOR QUICK TESTING
+        if not text or len(text.strip()) < 10:
+            mock_texts = {
+                'assess': """
+                Machine Learning Fundamentals
+                
+                Machine learning is a subset of artificial intelligence that enables computers to learn from data. The three main types are supervised learning (using labeled data), unsupervised learning (finding patterns), and reinforcement learning (learning through rewards).
+                
+                Key concepts include training data, features, algorithms, model validation, and overfitting. Applications include image recognition, natural language processing, and recommendation systems.
+                """,
+                'summarize': """
+                Climate Change and Environmental Impact
+                
+                Climate change refers to long-term shifts in global temperatures caused primarily by human activities since the 1800s. The greenhouse effect traps heat through gases like CO2, methane, and nitrous oxide.
+                
+                Major impacts include rising sea levels, extreme weather, ecosystem disruption, and biodiversity loss. Mitigation involves renewable energy and carbon capture, while adaptation requires infrastructure improvements.
+                """,
+                'default': """
+                Artificial Intelligence and Society
+                
+                AI systems perform tasks requiring human intelligence like visual perception, speech recognition, and decision-making. Current applications include virtual assistants, autonomous vehicles, and medical diagnosis.
+                
+                Ethical considerations include privacy, algorithmic bias, job displacement, and transparency. The future holds promise for solving global challenges while requiring responsible development.
+                """
+            }
+            text = mock_texts.get(action, mock_texts['default'])
+            print(f"🧪 Using mock text for '{action}' (length: {len(text)} chars)")
         
         # Map frontend actions to CrewAI flows
         flow_mapping = {
@@ -270,11 +299,12 @@ def process_text():
         print(f"Processed request for action: {action}, flow: {flow}")
         print(f"Returning result for: {action}")
         
-        # Update the PDF generation section (around line 285):
+        # Update the PDF generation section (around line 320):
         pdf_files = None
-        if action in ['assess']:  # ← Remove 'summarize' from here
+        if action in ['assess']:
             try:
-                from edumuse.src.tools.pdf_generator import PDFGenerator
+                # ✅ FIX: Use the correct import path that matches your working EduMUSE import
+                from src.edumuse.tools.pdf_generator import PDFGenerator  # ← Changed this line
                 
                 # Get data from the correct unified structure
                 if result and 'educational_content' in result:
@@ -293,7 +323,7 @@ def process_text():
                         'metadata': flow_data.get('metadata', {})
                     }
                     pdf_files = pdf_generator.generate_assessment_pdfs(assessment_data)
-        
+
                 print(f"✅ Generated {action} PDFs: {pdf_files}")
                 
                 # Add PDF info to result
@@ -307,6 +337,8 @@ def process_text():
                     
             except Exception as e:
                 print(f"❌ PDF generation failed: {e}")
+                import traceback
+                traceback.print_exc()  # ← Add this to see full error details
                 result['pdf_error'] = str(e)
         
         # Return the final result

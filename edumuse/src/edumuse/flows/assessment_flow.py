@@ -57,6 +57,11 @@ class AssessmentFlow(EducationFlow):
     def process(self, sources: List[Dict[str, Any]], context: Dict[str, Any]) -> Dict[str, Any]:
         """Process academic sources to generate educational assessments"""
         
+        # 🧪 ADD THIS DEBUG LINE
+        print("🎯 ASSESSMENT FLOW PROCESS METHOD CALLED!")
+        print(f"Topic: {context.get('topic', 'no topic')}")
+        print(f"Sources count: {len(sources)}")
+        
         topic = context.get('topic', 'general academic topic')
         user_level = context.get('user_level', 'intermediate')
         assessment_type = context.get('assessment_type', 'mixed')
