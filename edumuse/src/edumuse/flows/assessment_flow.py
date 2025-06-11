@@ -1,4 +1,3 @@
-
 from crewai import Agent, Crew, Task, Process
 from typing import List, Dict, Any, Optional
 from .flow_registry import EducationFlow, flow_registry
@@ -195,29 +194,27 @@ class AssessmentFlow(EducationFlow):
         
         crew_output = assessment_crew.kickoff()
         
-        # Structure the output
+        # ✅ FIXED: Match the expected frontend structure  
         return {
             "flow_type": "assessment",
-            "assessment_type": assessment_type,
-            "content": {
-                "raw_output": str(crew_output),
+            "retrieval_method": "educational_assessment_generation",
+            "sources_found": str(crew_output),  # ← Frontend expects this field!
+            "topic": topic,
+            "metadata": {
+                "question_types": question_types,
+                "total_questions": num_questions,
+                "difficulty_level": user_level,
+                "estimated_time": f"{num_questions * 2} minutes",
+                "generation_method": "pedagogical_assessment_design",
+                "agents_used": ["question_designer", "answer_validator", "difficulty_calibrator"]
+            },
+            # Keep assessment-specific data for PDF generation
+            "assessment_details": {
+                "assessment_type": assessment_type,
                 "num_questions": num_questions,
                 "question_types": question_types,
-                "difficulty_level": user_level
-            },
-            "topic": topic,
-            "sources_used": len(sources),
-            "metadata": {
-                "generation_method": "pedagogical_assessment_design",
-                "agents_used": ["question_designer", "answer_validator", "difficulty_calibrator"],
                 "learning_objectives": learning_objectives,
-                "cognitive_levels": ["remember", "understand", "apply", "analyze", "evaluate", "create"],
-                "assessment_features": [
-                    "answer_key_included",
-                    "rubrics_provided",
-                    "explanations_included",
-                    "difficulty_calibrated"
-                ]
+                "cognitive_levels": ["remember", "understand", "apply", "analyze", "evaluate", "create"]
             }
         }
     

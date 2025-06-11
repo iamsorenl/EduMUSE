@@ -80,28 +80,28 @@ def health_check():
 
 @app.route('/process', methods=['POST'])
 def process_text():
-    data = request.json
-    if not data or 'text' not in data or 'action' not in data:
-        return jsonify({'error': 'Missing text or action'}), 400
-    
-    text = data['text']
-    action = data['action']
-    
-    # Map frontend actions to CrewAI flows
-    flow_mapping = {
-        'highlight': 'highlight',
-        'search': 'web_search',
-        'explain': 'llm_knowledge',
-        'analyze': 'hybrid_retrieval',
-        'summarize': 'summary',
-        'assess': 'assessment'  # Add this line
-    }
-    
-    # Get the corresponding flow
-    flow = flow_mapping.get(action, 'summary')
-    print(f"Mapped action '{action}' to flow '{flow}'")
-    
     try:
+        data = request.json
+        if not data or 'text' not in data or 'action' not in data:
+            return jsonify({'error': 'Missing text or action'}), 400
+        
+        text = data['text']
+        action = data['action']
+        
+        # Map frontend actions to CrewAI flows
+        flow_mapping = {
+            'highlight': 'highlight',
+            'search': 'web_search',
+            'explain': 'llm_knowledge',
+            'analyze': 'hybrid_retrieval',
+            'summarize': 'summary',
+            'assess': 'assessment'
+        }
+        
+        # Get the corresponding flow
+        flow = flow_mapping.get(action, 'summary')
+        print(f"Mapped action '{action}' to flow '{flow}'")
+        
         # Debug information
         import sys
         import os
@@ -268,28 +268,38 @@ def process_text():
             }
         
         print(f"Processed request for action: {action}, flow: {flow}")
-        print(f"Returning mock result for testing")
+        print(f"Returning result for: {action}")
         
-        # For assessments, generate PDFs
+        # Update the PDF generation section (around line 285):
         pdf_files = None
-        if action == 'assess':
+        if action in ['assess']:  # ← Remove 'summarize' from here
             try:
                 from edumuse.src.tools.pdf_generator import PDFGenerator
                 
-                # Get assessment data
-                assessment_data = result if result else mock_results.get('assess', {})
+                # Get data from the correct unified structure
+                if result and 'educational_content' in result:
+                    flow_data = result['educational_content'].get(flow, {})
+                else:
+                    flow_data = result if result else mock_results.get(action, {})
                 
                 # Generate PDFs
                 pdf_generator = PDFGenerator(upload_folder=app.config['UPLOAD_FOLDER'])
-                pdf_files = pdf_generator.generate_assessment_pdfs(assessment_data)
                 
-                print(f"✅ Generated assessment PDFs: {pdf_files}")
+                if action == 'assess':
+                    # Use sources_found for assessment content
+                    assessment_data = {
+                        'sources_found': flow_data.get('sources_found', ''),
+                        'topic': flow_data.get('topic', 'Assessment'),
+                        'metadata': flow_data.get('metadata', {})
+                    }
+                    pdf_files = pdf_generator.generate_assessment_pdfs(assessment_data)
+        
+                print(f"✅ Generated {action} PDFs: {pdf_files}")
                 
-                # Add success info to result (not download links)
+                # Add PDF info to result
                 if pdf_files:
                     result['pdf_files'] = {
-                        'student_assessment': pdf_files['student_assessment'],
-                        'answer_key': pdf_files['answer_key'],
+                        **pdf_files,
                         'generated_at': datetime.now().isoformat(),
                         'location': 'uploads_folder'
                     }
@@ -299,16 +309,11 @@ def process_text():
                 print(f"❌ PDF generation failed: {e}")
                 result['pdf_error'] = str(e)
         
-        return jsonify({
-            'action': action,
-            'text': text,
-            'result': result,
-            'timestamp': datetime.now().isoformat()
-        }), 200
+        # Return the final result
+        return jsonify(result), 200
         
     except Exception as e:
-        import traceback
-        traceback.print_exc()
+        print(f"Error in process_text: {e}")
         return jsonify({'error': str(e)}), 500
 
 if __name__ == '__main__':

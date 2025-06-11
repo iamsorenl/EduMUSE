@@ -159,23 +159,25 @@ class SummaryFlow(EducationFlow):
         
         crew_output = summary_crew.kickoff()
         
-        # Structure the output
+        # ✅ FIXED: Match the expected frontend structure
         return {
             "flow_type": "summary",
-            "content_type": "multi_level_educational_summary",
-            "summaries": {
-                "raw_output": str(crew_output),
-                "levels": ["beginner", "intermediate", "advanced"],
-                "primary_level": user_level,
-                "format": summary_format
-            },
+            "retrieval_method": "educational_summarization",
+            "sources_found": str(crew_output),  # ← Frontend expects this field!
             "topic": topic,
-            "sources_processed": len(sources),
             "metadata": {
+                "summary_levels": ["beginner", "intermediate", "advanced"],
+                "user_level": user_level,
                 "generation_method": "concept_extraction_to_adaptive_summary",
                 "agents_used": ["concept_extractor", "summary_writer", "level_adapter"],
-                "learning_objectives": learning_objectives,
-                "user_context": context
+                "word_count": len(str(crew_output).split()),
+                "estimated_reading_time": f"{len(str(crew_output).split()) // 200 + 1} minutes"
+            },
+            # Keep additional data for potential future use
+            "summary_details": {
+                "levels": ["beginner", "intermediate", "advanced"],
+                "format": summary_format,
+                "learning_objectives": learning_objectives
             }
         }
     
