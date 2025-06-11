@@ -88,10 +88,17 @@ class EduMUSE():
                     "content": f"Error during {flow_name} execution: {str(e)}",
                 }
         
+        
+        final_flow_results = {}
+        for flow_name, result_data in flow_results.items():
+             if 'sources_found' in result_data and 'content' not in result_data:
+                 result_data['content'] = result_data['sources_found']
+             final_flow_results[flow_name] = result_data
+
         return {
             "topic": topic,
             "sources": sources,
-            "educational_content": flow_results,
+            "educational_content": final_flow_results,
             "metadata": {
                 "flows_executed": requested_flows,
                 "source_count": len(sources),

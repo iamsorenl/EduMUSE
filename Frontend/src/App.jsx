@@ -36,6 +36,8 @@ function App() {
   const [results, setResults] = useState([]);
   // State to manage loading status
   const [isLoading, setIsLoading] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
 
   // Handler for selecting a file from the file list
   const handleFileSelect = (file) => {
@@ -75,74 +77,64 @@ function App() {
   };
 
   // Updated handler for performing an action - now accepts text parameter
-  const handleAction = async (action, text = selectedText) => {
-    // Make sure we have text to work with
-    const textToProcess = text || selectedText;
-    
-    if (!textToProcess) {
-      console.warn('No text available for action:', action);
-      return; // Do nothing if no text is available
-    }
+  // Find the existing handleAction function and REPLACE it with this one:
 
-    // If it's just a highlight action, don't process with AI
-    if (action === 'highlight') {
-      console.log('Text highlighted:', textToProcess);
-      setSelectedText(textToProcess); // Update selected text for display
-      return; // Just keep the highlight, no AI processing
-    }
+  const handleAction = async (action, content, isPdf = false) => {
+    setLoading(true);
+    setError(null);
+    console.log(`Performing ${action} on text: ${content.substring(0, 80)}`);
 
-    setIsLoading(true); // Set loading state to true
-    
+    // This mapping tells the frontend how to find the right data in the response
+    const flowMapping = {
+      'search': 'web_search',
+      'explain': 'llm_knowledge',
+      'analyze': 'hybrid_retrieval',
+      'summarize': 'summary',
+      'assess': 'assessment'
+    };
+
+    const payload = isPdf ? { filename: content, action } : { text: content, action };
+
     try {
-      console.log(`Performing ${action} on text:`, textToProcess.substring(0, 100));
-      
-      // Generate unique ID for this result
-      const resultId = `result-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-      
-      // Make API call to the Flask server
       const response = await fetch('http://127.0.0.1:5000/process', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          action,
-          text: textToProcess
-        }),
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
       });
-      
-      if (!response.ok) {
-        throw new Error(`API call failed with status: ${response.status}`);
-      }
-      
-      const data = await response.json();
-      
-      // Format the result for display
-      const formattedResult = {
-        id: resultId,
-        action,
-        text: textToProcess.substring(0, 100) + (textToProcess.length > 100 ? '...' : ''),
-        data: data.result.educational_content[data.result.metadata.flows_executed[0]],
-        timestamp: data.timestamp,
-        fullText: textToProcess // Keep the full text for reference
-      };
 
-      // Add to results array instead of replacing
-      setResults(prev => [formattedResult, ...prev]); // Add newest first
-      setSelectedText(textToProcess); // Update selected text to show what was processed
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
+      }
+
+      const result = await response.json();
+      console.log("Processing result:", result);
+
+      // This is the key fix: We use the mapping to find the correct flow name
+      const flowName = flowMapping[action] || action;
       
-    } catch (error) {
-      console.error('Error calling API:', error); // Log any errors
-      const errorResult = {
-        id: `error-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-        action,
-        text: textToProcess.substring(0, 100) + (textToProcess.length > 100 ? '...' : ''),
-        error: `Failed to process request: ${error.message}`,
-        timestamp: new Date().toISOString(),
+      // Add a safety check before trying to access the data
+      if (!result || !result.educational_content || !result.educational_content[flowName]) {
+        throw new Error(`Invalid response structure received from server for action: ${action}`);
+      }
+
+      const flowData = result.educational_content[flowName];
+
+      const newResult = {
+        id: Date.now(),
+        type: action,
+        topic: result.topic,
+        data: flowData,
+        pdfFiles: result.pdf_files || null,
       };
-      setResults(prev => [errorResult, ...prev]);
+      
+      setResults(prevResults => [newResult, ...prevResults]);
+
+    } catch (error) {
+      console.error("Error calling API:", error);
+      setError(error.message);
     } finally {
-      setIsLoading(false); // Set loading state to false
+      setLoading(false);
     }
   };
 

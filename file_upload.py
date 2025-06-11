@@ -89,6 +89,7 @@ def list_files():
 def health_check():
     return jsonify({'status': 'healthy'}), 200
 
+
 @app.route('/process', methods=['POST'])
 @cross_origin()
 def process_text():
@@ -97,46 +98,60 @@ def process_text():
         action = data.get('action')
         filename = data.get('filename')
         input_text = data.get('text')
+        
         text_for_flow = ""
+        topic_for_crew = ""
 
+        # This logic now correctly sets the topic and content for both workflows
         if filename:
             filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
             if not os.path.exists(filepath):
                 return jsonify({'error': f"File not found: {filename}"}), 404
+            
             text_for_flow = extract_text_from_pdf(filepath)
+            topic_for_crew = filename  # For whole file, topic is the filename
+            
             if text_for_flow is None:
                 return jsonify({'error': f"Could not extract text from {filename}"}), 500
         elif input_text:
             text_for_flow = input_text
+            topic_for_crew = input_text  # For highlighted text, the topic IS the text
         else:
             return jsonify({'error': 'No input provided (missing "filename" or "text")'}), 400
 
         flow_mapping = {
-        'highlight': 'highlight',
-        'search': 'web_search',
-        'explain': 'llm_knowledge',
-        'analyze': 'hybrid_retrieval',
-        'summarize': 'summary',
-        'assess': 'assessment'
+            'highlight': 'highlight',
+            'search': 'web_search',
+            'explain': 'llm_knowledge',
+            'analyze': 'hybrid_retrieval',
+            'summarize': 'summary',
+            'assess': 'assessment'
         }
         flow = flow_mapping.get(action)
         if not flow:
             return jsonify({'error': f"Invalid action: {action}"}), 400
         
-        context = {"user_level": "intermediate", 'document_content': text_for_flow}
+        context = {
+            "user_level": "intermediate",
+            'document_content': text_for_flow
+        }
         
         edumuse = EduMUSE()
         result = edumuse.process_educational_request(
-            topic=(filename or "Uploaded Text"),
+            topic=topic_for_crew, # Use the correctly determined topic
             requested_flows=[flow],
             context=context
         )
 
+        # PDF generation logic for summarize/assess actions
         if action in ['assess', 'summarize']:
             try:
                 pdf_generator = PDFGenerator(upload_folder=app.config['UPLOAD_FOLDER'])
                 flow_data = result['educational_content'].get(flow, {})
-                flow_data['topic'] = f"{action.capitalize()} of {filename or 'text'}"
+                
+                # Use the original filename or a generic title for the PDF
+                pdf_topic_title = filename if filename else f"{action.capitalize()} Result"
+                flow_data['topic'] = f"{action.capitalize()} of {pdf_topic_title}"
 
                 if action == 'assess':
                     pdf_files = pdf_generator.generate_assessment_pdfs(flow_data)
@@ -152,6 +167,7 @@ def process_text():
         return jsonify(result), 200
         
     except Exception as e:
+        traceback.print_exc()
         return jsonify({'error': str(e)}), 500
 
 if __name__ == '__main__':
