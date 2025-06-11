@@ -101,6 +101,11 @@ function App() {
     
     try {
       // Call the QA pipeline API
+      console.log("Sending QA request:", { 
+        query: message,
+        context: selectedFile ? selectedFile.filename : null
+      });
+      
       const response = await fetch('http://127.0.0.1:5000/qa', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -110,17 +115,17 @@ function App() {
         }),
       });
       
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
+      const responseData = await response.json();
+      console.log("QA raw response:", responseData);
       
-      const result = await response.json();
-      console.log("QA response:", result);
+      if (!response.ok) {
+        throw new Error(responseData.error || `HTTP error! status: ${response.status}`);
+      }
       
       // Add AI response to chat
       const aiMessage = {
         id: Date.now() + 1,
-        content: result.answer || "I couldn't find an answer to that question.",
+        content: responseData.answer || "I couldn't find an answer to that question.",
         sender: 'ai',
         timestamp: Date.now()
       };

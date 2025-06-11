@@ -105,15 +105,40 @@ def qa_endpoint():
         if not query:
             return jsonify({'error': 'No query provided'}), 400
         
+        print(f"QA request received - Query: {query}, Context: {context}")
+        
         # Initialize the QA orchestrator
         orchestrator = MultiAgentOrchestrator()
         
-        # If context is provided (a PDF filename), use it as input
-        # Otherwise, use the query directly
-        input_for_qa = context if context else query
+        # If context is provided (a PDF filename), extract the text from the PDF
+        if context:
+            filepath = os.path.join(app.config['UPLOAD_FOLDER'], context)
+            print(f"Looking for file at: {filepath}")
+            
+            if not os.path.exists(filepath):
+                return jsonify({'error': f"File not found: {context}"}), 404
+            
+            print(f"File found, extracting text...")
+            text_from_pdf = extract_text_from_pdf(filepath)
+            
+            if text_from_pdf is None:
+                return jsonify({'error': f"Could not extract text from {context}"}), 500
+            
+            print(f"Text extracted successfully, length: {len(text_from_pdf)} characters")
+            
+            # For simplicity, let's just use the query with the PDF text as context
+            # This approach may need to be adjusted based on how the orchestrator expects input
+            input_for_qa = query + "\n\nContext: " + text_from_pdf[:5000]  # Limit context size
+            print(f"Using simplified input format with first 5000 chars of PDF")
+        else:
+            # If no context is provided, just use the query
+            input_for_qa = query
+            print(f"No context provided, using query directly")
         
         # Run the QA pipeline
+        print(f"Calling orchestrator.run()...")
         result = orchestrator.run(input_for_qa)
+        print(f"Orchestrator result received: {result}")
         
         # Format the response
         response = {
@@ -126,8 +151,9 @@ def qa_endpoint():
         return jsonify(response), 200
         
     except Exception as e:
+        print(f"ERROR in QA endpoint: {str(e)}")
         traceback.print_exc()
-        return jsonify({'error': str(e)}), 500
+        return jsonify({'error': str(e), 'trace': traceback.format_exc()}), 500
 
 
 @app.route('/process', methods=['POST'])
