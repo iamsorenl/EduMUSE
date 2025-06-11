@@ -36,21 +36,21 @@ const CrewAITip = ({ onConfirm, onCancel }) => (
         onClick={() => onConfirm({ text: 'search', emoji: '🔍' })}
         color="info"
       >
-        Web Search
+        Academic Paper Web Search
       </Button>
       <Button
         startIcon={<Psychology />}
         onClick={() => onConfirm({ text: 'explain', emoji: '🧠' })}
-        color="primary"
+        color="secondary"
       >
-        LLM Explain
+        Academic Paper LLM Result
       </Button>
       <Button
         startIcon={<Sync />}
         onClick={() => onConfirm({ text: 'analyze', emoji: '⚡' })}
-        color="secondary"
+        color="success"
       >
-        Hybrid Analysis
+        Hybrid Academic Paper Result
       </Button>
     </ButtonGroup>
 

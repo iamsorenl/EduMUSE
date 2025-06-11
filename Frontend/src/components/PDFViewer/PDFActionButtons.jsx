@@ -39,7 +39,7 @@ export default function PDFActionButtons({
               disabled={isLoading}
               color="warning"
             >
-              Highlight
+              Just Highlight
             </Button>
           </Tooltip>
           
@@ -50,7 +50,7 @@ export default function PDFActionButtons({
               disabled={isLoading}
               color="info"
             >
-              Web Search
+              Academic Paper Web Search
             </Button>
           </Tooltip>
           
@@ -59,9 +59,9 @@ export default function PDFActionButtons({
               startIcon={<Psychology />}
               onClick={() => onAction('explain')}
               disabled={isLoading}
-              color="primary"
+              color="secondary"
             >
-              LLM Explain
+              Academic Paper LLM Result
             </Button>
           </Tooltip>
           
@@ -70,9 +70,9 @@ export default function PDFActionButtons({
               startIcon={<Sync />}
               onClick={() => onAction('analyze')}
               disabled={isLoading}
-              color="secondary"
+              color="success"
             >
-              Hybrid Analysis
+              Hybrid Academic Paper Result
             </Button>
           </Tooltip>
         </ButtonGroup>
