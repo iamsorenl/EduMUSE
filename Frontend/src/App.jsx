@@ -13,6 +13,7 @@ import PDFViewer from './components/PDFViewer/PDFViewer';
 import FileList from './components/FileList/FileList';
 import ResultsPanel from './components/ResultsPanel/ResultsPanel';
 
+
 // Create a custom Material-UI theme
 const theme = createTheme({
   palette: {
@@ -126,6 +127,8 @@ function App() {
         topic: result.topic,
         data: flowData,
         pdfFiles: result.pdf_files || null,
+        text: content, 
+        timestamp: Date.now() 
       };
       
       setResults(prevResults => [newResult, ...prevResults]);
