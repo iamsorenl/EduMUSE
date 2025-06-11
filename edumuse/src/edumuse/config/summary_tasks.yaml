@@ -1,0 +1,150 @@
+# COPY CONTENT FROM summary_tasks.yaml ARTIFACT
+# Task configurations for Summary Flow  
+concept_extraction_task:
+  description: |
+    Analyze the provided academic sources about '{topic}' and extract comprehensive educational insights:
+    
+    1. **Core Concepts Identification**:
+       - Identify 5-10 key concepts that are essential for understanding the topic
+       - Provide clear, concise definitions for each concept
+       - Note which concepts are foundational vs. advanced
+    
+    2. **Learning Objectives Mapping**:
+       - Determine specific learning objectives (what students should know/do)
+       - Categorize objectives by cognitive level (remember, understand, apply, etc.)
+       - Align objectives with identified concepts
+    
+    3. **Concept Relationships**:
+       - Map how concepts connect and build upon each other
+       - Identify prerequisite relationships
+       - Note which concepts can be learned in parallel
+    
+    4. **Difficulty Analysis**:
+       - Identify concepts that are typically challenging for learners
+       - Note common misconceptions or confusion points
+       - Suggest scaffolding strategies for difficult concepts
+    
+    5. **Learning Pathway**:
+       - Recommend an optimal sequence for learning the concepts
+       - Identify entry points for different skill levels
+       - Suggest connections to prior knowledge
+    
+    Analyze these sources thoroughly to create a foundation for effective summary creation.
+  expected_output: |
+    A comprehensive concept analysis document containing:
+    - Detailed list of 5-10 core concepts with definitions
+    - Clear learning objectives organized by cognitive level
+    - Visual or textual concept map showing relationships
+    - Prerequisite knowledge requirements
+    - Difficulty assessment for each concept
+    - Recommended learning sequence
+    - Common misconceptions to address
+  agent: concept_extractor
+
+summary_creation_task:
+  description: |
+    Based on the concept analysis, create three educational summaries for '{topic}' targeting different learning levels.
+    
+    **BEGINNER LEVEL SUMMARY** (300-400 words):
+    - Use simple, everyday language
+    - Focus on the 3-5 most fundamental concepts only
+    - Include relatable analogies and real-world examples
+    - Avoid all technical jargon or define it simply
+    - Use short sentences and clear structure
+    - Include visual descriptions where helpful
+    
+    **INTERMEDIATE LEVEL SUMMARY** (500-700 words):
+    - Introduce technical terminology with clear explanations
+    - Cover all main concepts and show connections
+    - Include field-specific examples and applications
+    - Explain the "why" behind concepts, not just "what"
+    - Balance accessibility with appropriate complexity
+    - Reference practical uses and implications
+    
+    **ADVANCED LEVEL SUMMARY** (800-1000 words):
+    - Use field-appropriate technical language freely
+    - Include nuanced details, edge cases, and exceptions
+    - Discuss current research, debates, and open questions
+    - Connect to broader theoretical frameworks
+    - Include critical analysis and evaluation
+    - Reference primary sources and seminal works
+    
+    Format: {summary_format}
+    Primary audience level: {user_level}
+    
+    Ensure each summary is complete, self-contained, and appropriate for its target audience.
+  expected_output: |
+    Three complete, well-structured summaries clearly labeled as:
+    
+    === BEGINNER LEVEL SUMMARY ===
+    [300-400 word summary with simple language and examples]
+    
+    === INTERMEDIATE LEVEL SUMMARY ===
+    [500-700 word summary with balanced complexity]
+    
+    === ADVANCED LEVEL SUMMARY ===
+    [800-1000 word summary with full technical depth]
+    
+    Each summary should be engaging, accurate, and pedagogically sound.
+  agent: summary_writer
+
+adaptation_task:
+  description: |
+    Optimize and enhance the multi-level summaries for the specific learner's needs.
+    
+    User Profile:
+    - Current Level: {user_level}
+    - Learning Objectives: {learning_objectives}
+    - Available Study Time: {study_time}
+    
+    Enhancement Tasks:
+    
+    1. **Personalization**:
+       - Highlight the most appropriate summary level for the user
+       - Add transition notes between levels for progression
+       - Customize examples based on user's context if known
+    
+    2. **Study Aids Creation**:
+       - Create a glossary of key terms (10-15 terms)
+       - Develop 5-7 key takeaway points
+       - Write 3-5 self-check questions for each level
+       - Add memory aids or mnemonics where helpful
+    
+    3. **Learning Path Guidance**:
+       - Recommend specific study sequence based on user level
+       - Suggest time allocation for different concepts
+       - Identify which sections to focus on first
+       - Provide "next steps" for continued learning
+    
+    4. **Metacognitive Support**:
+       - Include study tips specific to the content
+       - Add reflection prompts for deeper understanding
+       - Suggest active learning strategies
+       - Provide success criteria for mastery
+    
+    Create a complete learning package that maximizes educational value for this specific learner.
+  expected_output: |
+    An enhanced educational package containing:
+    
+    1. **Optimized Summary Set**:
+       - All three summaries with personalization notes
+       - Clear indication of recommended starting level
+       - Progression guidance between levels
+    
+    2. **Study Aids**:
+       - Comprehensive glossary with definitions
+       - Key takeaways list (5-7 points)
+       - Self-check questions with answers
+       - Study tips and strategies
+    
+    3. **Personalized Learning Path**:
+       - Recommended study sequence
+       - Time estimates for each section
+       - Focus areas based on objectives
+       - Next steps and additional resources
+    
+    4. **Assessment Tools**:
+       - Self-evaluation checklist
+       - Concept mastery indicators
+       - Reflection prompts
+  agent: level_adapter

@@ -1,0 +1,315 @@
+{
+  "individual_results": [
+    {
+      "topic": "machine learning transformers",
+      "flow_name": "web_search",
+      "processing_time": 23.938143014907837,
+      "quality_scores": {
+        "relevance": 0.0,
+        "credibility": 5.0,
+        "coverage": 3.0,
+        "recency": 0.0,
+        "accessibility": 9.0
+      },
+      "total_score": 2.75,
+      "sources_count": 1,
+      "content_length": 0,
+      "retrieval_method": "unknown"
+    },
+    {
+      "topic": "machine learning transformers",
+      "flow_name": "llm_knowledge",
+      "processing_time": 20.498693704605103,
+      "quality_scores": {
+        "relevance": 0.0,
+        "credibility": 5.0,
+        "coverage": 3.0,
+        "recency": 0.0,
+        "accessibility": 9.0
+      },
+      "total_score": 2.75,
+      "sources_count": 1,
+      "content_length": 0,
+      "retrieval_method": "unknown"
+    },
+    {
+      "topic": "machine learning transformers",
+      "flow_name": "hybrid_retrieval",
+      "processing_time": 23.775376796722412,
+      "quality_scores": {
+        "relevance": 0.0,
+        "credibility": 5.0,
+        "coverage": 3.0,
+        "recency": 0.0,
+        "accessibility": 9.0
+      },
+      "total_score": 2.75,
+      "sources_count": 1,
+      "content_length": 0,
+      "retrieval_method": "unknown"
+    },
+    {
+      "topic": "quantum computing algorithms",
+      "flow_name": "web_search",
+      "processing_time": 22.24308490753174,
+      "quality_scores": {
+        "relevance": 0.0,
+        "credibility": 5.0,
+        "coverage": 3.0,
+        "recency": 0.0,
+        "accessibility": 9.0
+      },
+      "total_score": 2.75,
+      "sources_count": 1,
+      "content_length": 0,
+      "retrieval_method": "unknown"
+    },
+    {
+      "topic": "quantum computing algorithms",
+      "flow_name": "llm_knowledge",
+      "processing_time": 23.7572820186615,
+      "quality_scores": {
+        "relevance": 0.0,
+        "credibility": 5.0,
+        "coverage": 3.0,
+        "recency": 0.0,
+        "accessibility": 9.0
+      },
+      "total_score": 2.75,
+      "sources_count": 1,
+      "content_length": 0,
+      "retrieval_method": "unknown"
+    },
+    {
+      "topic": "quantum computing algorithms",
+      "flow_name": "hybrid_retrieval",
+      "processing_time": 21.77130889892578,
+      "quality_scores": {
+        "relevance": 0.0,
+        "credibility": 5.0,
+        "coverage": 3.0,
+        "recency": 0.0,
+        "accessibility": 9.0
+      },
+      "total_score": 2.75,
+      "sources_count": 1,
+      "content_length": 0,
+      "retrieval_method": "unknown"
+    },
+    {
+      "topic": "climate change policy",
+      "flow_name": "web_search",
+      "processing_time": 15.711704015731812,
+      "quality_scores": {
+        "relevance": 0.0,
+        "credibility": 5.0,
+        "coverage": 3.0,
+        "recency": 0.0,
+        "accessibility": 9.0
+      },
+      "total_score": 2.75,
+      "sources_count": 1,
+      "content_length": 0,
+      "retrieval_method": "unknown"
+    },
+    {
+      "topic": "climate change policy",
+      "flow_name": "llm_knowledge",
+      "processing_time": 16.57563328742981,
+      "quality_scores": {
+        "relevance": 0.0,
+        "credibility": 5.0,
+        "coverage": 3.0,
+        "recency": 0.0,
+        "accessibility": 9.0
+      },
+      "total_score": 2.75,
+      "sources_count": 1,
+      "content_length": 0,
+      "retrieval_method": "unknown"
+    },
+    {
+      "topic": "climate change policy",
+      "flow_name": "hybrid_retrieval",
+      "processing_time": 86.3626298904419,
+      "quality_scores": {
+        "relevance": 0.0,
+        "credibility": 5.0,
+        "coverage": 3.0,
+        "recency": 0.0,
+        "accessibility": 9.0
+      },
+      "total_score": 2.75,
+      "sources_count": 1,
+      "content_length": 0,
+      "retrieval_method": "unknown"
+    },
+    {
+      "topic": "natural language processing",
+      "flow_name": "web_search",
+      "processing_time": 17.354440927505493,
+      "quality_scores": {
+        "relevance": 0.0,
+        "credibility": 5.0,
+        "coverage": 3.0,
+        "recency": 0.0,
+        "accessibility": 9.0
+      },
+      "total_score": 2.75,
+      "sources_count": 1,
+      "content_length": 0,
+      "retrieval_method": "unknown"
+    },
+    {
+      "topic": "natural language processing",
+      "flow_name": "llm_knowledge",
+      "processing_time": 20.31576919555664,
+      "quality_scores": {
+        "relevance": 0.0,
+        "credibility": 5.0,
+        "coverage": 3.0,
+        "recency": 0.0,
+        "accessibility": 9.0
+      },
+      "total_score": 2.75,
+      "sources_count": 1,
+      "content_length": 0,
+      "retrieval_method": "unknown"
+    },
+    {
+      "topic": "natural language processing",
+      "flow_name": "hybrid_retrieval",
+      "processing_time": 16.724663019180298,
+      "quality_scores": {
+        "relevance": 0.0,
+        "credibility": 5.0,
+        "coverage": 3.0,
+        "recency": 0.0,
+        "accessibility": 9.0
+      },
+      "total_score": 2.75,
+      "sources_count": 1,
+      "content_length": 0,
+      "retrieval_method": "unknown"
+    },
+    {
+      "topic": "artificial neural networks",
+      "flow_name": "web_search",
+      "processing_time": 17.21627116203308,
+      "quality_scores": {
+        "relevance": 0.0,
+        "credibility": 5.0,
+        "coverage": 3.0,
+        "recency": 0.0,
+        "accessibility": 9.0
+      },
+      "total_score": 2.75,
+      "sources_count": 1,
+      "content_length": 0,
+      "retrieval_method": "unknown"
+    },
+    {
+      "topic": "artificial neural networks",
+      "flow_name": "llm_knowledge",
+      "processing_time": 15.452772855758667,
+      "quality_scores": {
+        "relevance": 0.0,
+        "credibility": 5.0,
+        "coverage": 3.0,
+        "recency": 0.0,
+        "accessibility": 9.0
+      },
+      "total_score": 2.75,
+      "sources_count": 1,
+      "content_length": 0,
+      "retrieval_method": "unknown"
+    },
+    {
+      "topic": "artificial neural networks",
+      "flow_name": "hybrid_retrieval",
+      "processing_time": 22.866368055343628,
+      "quality_scores": {
+        "relevance": 0.0,
+        "credibility": 5.0,
+        "coverage": 3.0,
+        "recency": 0.0,
+        "accessibility": 9.0
+      },
+      "total_score": 2.75,
+      "sources_count": 1,
+      "content_length": 0,
+      "retrieval_method": "unknown"
+    }
+  ],
+  "comparative_summary": {
+    "web_search": {
+      "avg_processing_time": 19.29272880554199,
+      "avg_total_score": 2.75,
+      "avg_sources_count": 1.0,
+      "avg_content_length": 0.0,
+      "quality_breakdown": {
+        "relevance": 0.0,
+        "credibility": 5.0,
+        "coverage": 3.0,
+        "recency": 0.0,
+        "accessibility": 9.0
+      }
+    },
+    "llm_knowledge": {
+      "avg_processing_time": 19.320030212402344,
+      "avg_total_score": 2.75,
+      "avg_sources_count": 1.0,
+      "avg_content_length": 0.0,
+      "quality_breakdown": {
+        "relevance": 0.0,
+        "credibility": 5.0,
+        "coverage": 3.0,
+        "recency": 0.0,
+        "accessibility": 9.0
+      }
+    },
+    "hybrid_retrieval": {
+      "avg_processing_time": 34.3000693321228,
+      "avg_total_score": 2.75,
+      "avg_sources_count": 1.0,
+      "avg_content_length": 0.0,
+      "quality_breakdown": {
+        "relevance": 0.0,
+        "credibility": 5.0,
+        "coverage": 3.0,
+        "recency": 0.0,
+        "accessibility": 9.0
+      }
+    }
+  },
+  "methodology": {
+    "evaluation_criteria": {
+      "relevance": {
+        "weight": 0.3,
+        "max_score": 10
+      },
+      "credibility": {
+        "weight": 0.25,
+        "max_score": 10
+      },
+      "coverage": {
+        "weight": 0.2,
+        "max_score": 10
+      },
+      "recency": {
+        "weight": 0.15,
+        "max_score": 10
+      },
+      "accessibility": {
+        "weight": 0.1,
+        "max_score": 10
+      }
+    },
+    "test_topics_count": 5,
+    "flows_tested": [
+      "web_search",
+      "llm_knowledge",
+      "hybrid_retrieval"
+    ]
+  }
+}
