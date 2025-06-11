@@ -2,7 +2,7 @@ from crewai import Agent, Crew, Process, Task
 from crewai.project import CrewBase, agent, crew, task
 from crewai_tools import SerperDevTool
 from typing import List, Dict, Any
-from .flows.flow_registry import flow_registry
+from edumuse.flows.flow_registry import flow_registry
 
 @CrewBase
 class EduMUSE():

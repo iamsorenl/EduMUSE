@@ -1,10 +1,10 @@
 import sys
 import os
-import PyPDF2  # Import the new library
+import PyPDF2
 import traceback
 from datetime import datetime
 
-# Add the 'src' directory to Python's path
+# Add the 'src' directory to Python's path to allow for clean imports
 src_path = os.path.join(os.path.dirname(__file__), 'edumuse', 'src')
 sys.path.insert(0, src_path)
 
@@ -25,11 +25,15 @@ from werkzeug.utils import secure_filename
 app = Flask(__name__)
 CORS(app)
 
-UPLOAD_FOLDER = 'uploads'
+# Define UPLOAD_FOLDER as an absolute path to prevent ambiguity
+UPLOAD_FOLDER = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'uploads')
+
+if not os.path.exists(UPLOAD_FOLDER):
+    os.makedirs(UPLOAD_FOLDER)
+
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 app.config['MAX_CONTENT_LENGTH'] = 50 * 1024 * 1024
 
-# --- New Helper Function to Extract Text from PDF ---
 def extract_text_from_pdf(filepath):
     """Opens a PDF file and returns its text content."""
     text = ""
@@ -43,8 +47,8 @@ def extract_text_from_pdf(filepath):
         return None
     return text
 
-# --- Existing Endpoints (largely unchanged) ---
 @app.route('/upload', methods=['POST'])
+@cross_origin()
 def upload_document():
     if 'file' not in request.files:
         return jsonify({'error': 'No file provided'}), 400
@@ -62,27 +66,39 @@ def upload_document():
     return jsonify({'error': 'Invalid file type.'}), 400
 
 @app.route('/files/<filename>')
+@cross_origin()
 def serve_file(filename):
+    """Serves a specific file from the uploads folder."""
     return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
 
+@app.route('/files', methods=['GET'])
+@cross_origin()
+def list_files():
+    """Lists all PDF files in the uploads folder."""
+    try:
+        files = []
+        for filename in os.listdir(app.config['UPLOAD_FOLDER']):
+            if filename.lower().endswith('.pdf'):
+                files.append({'filename': filename})
+        return jsonify({'files': files}), 200
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
 @app.route('/health', methods=['GET'])
+@cross_origin()
 def health_check():
     return jsonify({'status': 'healthy'}), 200
 
-# --- Updated Process Endpoint ---
 @app.route('/process', methods=['POST'])
+@cross_origin()
 def process_text():
     try:
         data = request.json
-        if not data or 'action' not in data:
-            return jsonify({'error': 'Missing action'}), 400
-        
         action = data.get('action')
         filename = data.get('filename')
         input_text = data.get('text')
         text_for_flow = ""
 
-        # Determine the source of the text for the flow
         if filename:
             filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
             if not os.path.exists(filepath):
@@ -96,34 +112,30 @@ def process_text():
             return jsonify({'error': 'No input provided (missing "filename" or "text")'}), 400
 
         flow_mapping = {
-            'summarize': 'summary',
-            'assess': 'assessment'
-            # other flows can be added here
+        'highlight': 'highlight',
+        'search': 'web_search',
+        'explain': 'llm_knowledge',
+        'analyze': 'hybrid_retrieval',
+        'summarize': 'summary',
+        'assess': 'assessment'
         }
         flow = flow_mapping.get(action)
         if not flow:
             return jsonify({'error': f"Invalid action: {action}"}), 400
         
-        context = {"user_level": "intermediate"}
-        
-        # Add the full document content to the context to be processed
-        context['document_content'] = text_for_flow
+        context = {"user_level": "intermediate", 'document_content': text_for_flow}
         
         edumuse = EduMUSE()
-        # Use the filename as the topic for better tracking
         result = edumuse.process_educational_request(
             topic=(filename or "Uploaded Text"),
             requested_flows=[flow],
             context=context
         )
-        # PDF generation logic
-        pdf_files = None
+
         if action in ['assess', 'summarize']:
             try:
                 pdf_generator = PDFGenerator(upload_folder=app.config['UPLOAD_FOLDER'])
                 flow_data = result['educational_content'].get(flow, {})
-                
-                # Add original filename to the data for better PDF titles
                 flow_data['topic'] = f"{action.capitalize()} of {filename or 'text'}"
 
                 if action == 'assess':
@@ -132,18 +144,14 @@ def process_text():
                     pdf_files = pdf_generator.generate_summary_pdf(flow_data)
 
                 if pdf_files:
-                    result['pdf_files'] = { **pdf_files, 'generated_at': datetime.now().isoformat() }
+                    result['pdf_files'] = {**pdf_files, 'generated_at': datetime.now().isoformat()}
                     result['pdf_generated'] = True
-                    
             except Exception as e:
-                print(f"❌ PDF generation failed: {e}")
-                traceback.print_exc()
                 result['pdf_error'] = str(e)
         
         return jsonify(result), 200
         
     except Exception as e:
-        traceback.print_exc()
         return jsonify({'error': str(e)}), 500
 
 if __name__ == '__main__':

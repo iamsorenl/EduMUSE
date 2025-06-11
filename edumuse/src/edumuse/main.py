@@ -5,13 +5,13 @@ from datetime import datetime
 from typing import List, Dict, Any
 
 # Ensure all flows are imported to register them with the flow_registry
-from edumuse.crew import EduMUSE
-from edumuse.flows.flow_registry import flow_registry
-from edumuse.flows.web_search_flow import WebSearchFlow
-from edumuse.flows.llm_knowledge_flow import LLMKnowledgeFlow
-from edumuse.flows.hybrid_retrieval_flow import HybridRetrievalFlow
-from edumuse.flows.assessment_flow import AssessmentFlow
-from edumuse.flows.summary_flow import SummaryFlow
+from crew import EduMUSE
+from flows.flow_registry import flow_registry
+from flows.web_search_flow import WebSearchFlow
+from flows.llm_knowledge_flow import LLMKnowledgeFlow
+from flows.hybrid_retrieval_flow import HybridRetrievalFlow
+from flows.assessment_flow import AssessmentFlow
+from flows.summary_flow import SummaryFlow
 
 warnings.filterwarnings("ignore", category=SyntaxWarning, module="pysbd")
 

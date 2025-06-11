@@ -1,0 +1,5 @@
+# Assessment Output
+
+**Topic**: the role of artificial intelligence in personalized education
+
+{'type': 'assessment', 'content': 'Mock assessment output - flow not implemented yet', 'sources_used': 1, 'context': {'topic': 'the role of artificial intelligence in personalized education', 'user_level': 'intermediate', 'learning_objective': 'understand practical applications', 'time_available': '30 minutes', 'num_questions': 5}}
