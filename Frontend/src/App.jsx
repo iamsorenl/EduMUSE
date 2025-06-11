@@ -154,6 +154,8 @@ function App() {
                 <FileList 
                   onFileSelect={handleFileSelect} // Pass file selection handler
                   selectedFile={selectedFile} // Pass currently selected file
+                  onAction={handleAction} // Pass action handler for summary/assessment generation
+                  isLoading={isLoading} // Pass loading state
                 />
               </Paper>
             </Grid>
