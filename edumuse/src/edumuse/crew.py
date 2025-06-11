@@ -54,27 +54,26 @@ class EduMUSE():
         
         if context is None:
             context = {}
-        
-        # 🔧 FIXED: Skip CrewAI for now and directly execute flows
-        # The CrewAI agents aren't properly calling the registered flows
-        
-        # Mock sources for flow execution
+
+        # Get the real document content that was passed from file_upload.py
+        document_content = context.get('document_content', '')
+
+        # Create a proper source object with the real content from the PDF
         sources = [
             {
-                "title": f"Academic Source about {topic}",
-                "url": "https://example.edu/paper1",
-                "credibility_score": 8.5,
-                "source_type": "academic_paper"
+                "title": topic,
+                "url": f"localfile://{topic.replace(' ', '_')}",
+                "content": document_content, # Use the actual content here
+                "source_type": "uploaded_document"
             }
         ]
         
-        # 🔧 FIXED: Directly execute registered flows instead of relying on CrewAI agents
+        # This part remains the same, but now it uses the REAL sources
         flow_results = {}
         for flow_name in requested_flows:
             print(f"🔧 Directly executing flow: {flow_name}")
             
             try:
-                # Execute the actual registered flow
                 flow_results[flow_name] = flow_registry.execute_flow(
                     flow_name, 
                     sources, 
@@ -85,10 +84,8 @@ class EduMUSE():
             except Exception as e:
                 print(f"❌ Error executing {flow_name}: {e}")
                 flow_results[flow_name] = {
-                    "flow_type": f"{flow_name}_error",
-                    "retrieval_method": "execution_failed",
-                    "sources_found": f"Error executing {flow_name}: {str(e)}",
-                    "error": str(e)
+                    "type": f"{flow_name}_error",
+                    "content": f"Error during {flow_name} execution: {str(e)}",
                 }
         
         return {
