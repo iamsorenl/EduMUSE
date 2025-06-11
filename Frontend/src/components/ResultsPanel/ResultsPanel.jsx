@@ -70,6 +70,31 @@ const formatResult = (data) => {
             </Typography>
           </Box>
         )}
+        
+        {/* PDF Generation Success - for assessments */}
+        {data.flow_type === 'assessment' && data.pdf_files && (
+          <Box sx={{ mt: 2, p: 2, bgcolor: 'success.light', borderRadius: 1, border: '1px solid', borderColor: 'success.main' }}>
+            <Typography variant="subtitle2" color="success.dark" gutterBottom sx={{ display: 'flex', alignItems: 'center' }}>
+              ✅ Assessment PDFs Generated Successfully
+            </Typography>
+            <Typography variant="body2" color="success.dark" sx={{ fontSize: '0.85rem' }}>
+              • Student Assessment: <code>{data.pdf_files.student_assessment?.split('/').pop()}</code><br/>
+              • Answer Key: <code>{data.pdf_files.answer_key?.split('/').pop()}</code>
+            </Typography>
+            <Typography variant="caption" color="success.dark" sx={{ display: 'block', mt: 1 }}>
+              📁 Files saved to uploads folder - check the file list to download
+            </Typography>
+          </Box>
+        )}
+        
+        {/* General PDF success for other flows */}
+        {data.pdf_generated && data.flow_type !== 'assessment' && (
+          <Box sx={{ mt: 1, p: 1, bgcolor: 'info.light', borderRadius: 1 }}>
+            <Typography variant="caption" color="info.dark">
+              📄 PDF generated: {data.pdf_filename}
+            </Typography>
+          </Box>
+        )}
       </>
     );
   }

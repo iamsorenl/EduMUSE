@@ -87,10 +87,12 @@ def process_text():
     
     # Map frontend actions to CrewAI flows
     flow_mapping = {
-        'highlight': 'highlight',  # No AI processing, just highlighting
-        'search': 'web_search',    # Web search flow
-        'explain': 'llm_knowledge', # LLM knowledge flow
-        'analyze': 'hybrid_retrieval' # Hybrid approach
+        'highlight': 'highlight',
+        'search': 'web_search',
+        'explain': 'llm_knowledge',
+        'analyze': 'hybrid_retrieval',
+        'summarize': 'summary',
+        'assess': 'assessment'  # Add this line
     }
     
     # Get the corresponding flow
@@ -224,6 +226,17 @@ def process_text():
                         'synthesis_approach': 'mock_synthesis',
                         'coverage': 'mock_coverage'
                     }
+                },
+                'assess': {
+                    'flow_type': 'assessment',
+                    'retrieval_method': 'mock_data', 
+                    'sources_found': f"Assessment for: {text[:100]}...\n\nMULTIPLE CHOICE:\n\n1. What is the main concept discussed in this text?\nA) Option A\nB) Option B\nC) Option C\nD) Option D\n\n2. Which statement best describes...?\nA) Statement A\nB) Statement B\nC) Statement C\nD) Statement D\n\nSHORT ANSWER:\n\n3. Explain the key principles mentioned in the text.\n\n4. How would you apply these concepts in practice?",
+                    'topic': text[:50] + "...",
+                    'metadata': {
+                        'question_types': ['multiple_choice', 'short_answer'],
+                        'total_questions': 4,
+                        'estimated_time': '15 minutes'
+                    }
                 }
             }
         
@@ -254,6 +267,35 @@ def process_text():
         
         print(f"Processed request for action: {action}, flow: {flow}")
         print(f"Returning mock result for testing")
+        
+        # For assessments, generate PDFs
+        pdf_files = None
+        if action == 'assess':
+            try:
+                from edumuse.src.tools.pdf_generator import PDFGenerator
+                
+                # Get assessment data
+                assessment_data = result if result else mock_results.get('assess', {})
+                
+                # Generate PDFs
+                pdf_generator = PDFGenerator(upload_folder=app.config['UPLOAD_FOLDER'])
+                pdf_files = pdf_generator.generate_assessment_pdfs(assessment_data)
+                
+                print(f"✅ Generated assessment PDFs: {pdf_files}")
+                
+                # Add success info to result (not download links)
+                if pdf_files:
+                    result['pdf_files'] = {
+                        'student_assessment': pdf_files['student_assessment'],
+                        'answer_key': pdf_files['answer_key'],
+                        'generated_at': datetime.now().isoformat(),
+                        'location': 'uploads_folder'
+                    }
+                    result['pdf_generated'] = True
+                    
+            except Exception as e:
+                print(f"❌ PDF generation failed: {e}")
+                result['pdf_error'] = str(e)
         
         return jsonify({
             'action': action,
