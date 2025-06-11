@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   Box,
   Typography,
@@ -10,9 +10,12 @@ import {
   Button,
   IconButton,
   Stack,
-  Collapse
+  Collapse,
+  Tabs,
+  Tab
 } from '@mui/material';
-import { Psychology, CheckCircle, Clear, Close, DeleteOutline, ExpandMore, ExpandLess, HighlightOff } from '@mui/icons-material';
+import { Psychology, CheckCircle, Clear, Close, DeleteOutline, ExpandMore, ExpandLess, HighlightOff, QuestionAnswer } from '@mui/icons-material';
+import QAChat from '../QAChat';
 
 // Helper function to format CrewAI results
 const formatResult = (data) => {
@@ -221,40 +224,78 @@ export default function ResultsPanel({
   highlights, 
   onClearAllResults, 
   onDeleteResult,
-  onClearHighlights // NEW: Add prop for clearing highlights
+  onClearHighlights, // NEW: Add prop for clearing highlights
+  chatMessages = [],
+  onSendChatMessage,
+  isChatLoading = false,
+  onClearChat
 }) {
+  const [activeTab, setActiveTab] = useState(0);
+
+  const handleTabChange = (event, newValue) => {
+    setActiveTab(newValue);
+  };
 
   return (
-    <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
-      {/* Header */}
-      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
-        <Box sx={{ display: 'flex', alignItems: 'center' }}>
-          <Psychology sx={{ mr: 1, color: 'primary.main' }} />
-          <Typography variant="h6">
-            AI Results
-            {results && results.length > 0 && (
-              <Typography component="span" variant="body2" color="text.secondary" sx={{ ml: 1 }}>
-                ({results.length})
-              </Typography>
-            )}
-          </Typography>
-        </Box>
-        
-        {/* Clear AI Results Button - only show when there are results */}
-        {results && results.length > 0 && !isLoading && onClearAllResults && (
-          <IconButton 
-            onClick={onClearAllResults}
-            size="small"
-            color="error"
-            title="Clear AI Results Only"
-            sx={{ ml: 1 }}
-          >
-            <Clear />
-          </IconButton>
-        )}
-      </Box>
+    <Box sx={{ 
+      height: '100%', 
+      display: 'flex', 
+      flexDirection: 'column',
+      overflow: 'hidden' // Prevent the entire component from expanding
+    }}>
+      {/* Tabs */}
+      <Tabs 
+        value={activeTab} 
+        onChange={handleTabChange} 
+        sx={{ mb: 2 }}
+        variant="fullWidth"
+      >
+        <Tab 
+          icon={<Psychology />} 
+          label="AI Results" 
+          iconPosition="start"
+          sx={{ minHeight: 48 }}
+        />
+        <Tab 
+          icon={<QuestionAnswer />} 
+          label="QA Chat" 
+          iconPosition="start"
+          sx={{ minHeight: 48 }}
+        />
+      </Tabs>
       
-      <Divider sx={{ mb: 2 }} />
+      {/* AI Results Tab */}
+      {activeTab === 0 && (
+        <Box sx={{ display: 'flex', flexDirection: 'column', height: 'calc(100% - 48px)' }}>
+          {/* Header */}
+          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
+            <Box sx={{ display: 'flex', alignItems: 'center' }}>
+              <Psychology sx={{ mr: 1, color: 'primary.main' }} />
+              <Typography variant="h6">
+                AI Results
+                {results && results.length > 0 && (
+                  <Typography component="span" variant="body2" color="text.secondary" sx={{ ml: 1 }}>
+                    ({results.length})
+                  </Typography>
+                )}
+              </Typography>
+            </Box>
+            
+            {/* Clear AI Results Button - only show when there are results */}
+            {results && results.length > 0 && !isLoading && onClearAllResults && (
+              <IconButton 
+                onClick={onClearAllResults}
+                size="small"
+                color="error"
+                title="Clear AI Results Only"
+                sx={{ ml: 1 }}
+              >
+                <Clear />
+              </IconButton>
+            )}
+          </Box>
+          
+          <Divider sx={{ mb: 2 }} />
       
       {/* Loading state */}
       {isLoading && (
@@ -394,6 +435,26 @@ export default function ResultsPanel({
           <Typography variant="body2">
             Select text in the PDF to see AI-powered analysis here.
           </Typography>
+        </Box>
+      )}
+        </Box>
+      )}
+      
+      {/* QA Chat Tab */}
+      {activeTab === 1 && (
+        <Box sx={{ 
+          height: 'calc(100% - 72px)', // ← FIXED: Increased from 60px to 72px for actual tab height
+          minHeight: 0,
+          overflow: 'hidden',
+          display: 'flex',
+          flexDirection: 'column'
+        }}>
+          <QAChat 
+            messages={chatMessages}
+            onSendMessage={onSendChatMessage}
+            isLoading={isChatLoading}
+            onClearChat={onClearChat}
+          />
         </Box>
       )}
     </Box>

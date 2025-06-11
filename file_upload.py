@@ -17,6 +17,11 @@ from edumuse.flows.hybrid_retrieval_flow import HybridRetrievalFlow
 from edumuse.flows.assessment_flow import AssessmentFlow
 from edumuse.flows.summary_flow import SummaryFlow
 
+# Import QA pipeline components
+qa_pipeline_path = os.path.join(os.path.dirname(__file__), 'EduMUSE-ishika-qa-pipeline', 'multi_agent_pipeline')
+sys.path.insert(0, qa_pipeline_path)
+from orchestrator.orchestrator import MultiAgentOrchestrator
+
 # --- Standard Flask Imports ---
 from flask import Flask, request, jsonify, send_from_directory
 from flask_cors import CORS, cross_origin
@@ -88,6 +93,41 @@ def list_files():
 @cross_origin()
 def health_check():
     return jsonify({'status': 'healthy'}), 200
+
+@app.route('/qa', methods=['POST'])
+@cross_origin()
+def qa_endpoint():
+    try:
+        data = request.json
+        query = data.get('query')
+        context = data.get('context')
+        
+        if not query:
+            return jsonify({'error': 'No query provided'}), 400
+        
+        # Initialize the QA orchestrator
+        orchestrator = MultiAgentOrchestrator()
+        
+        # If context is provided (a PDF filename), use it as input
+        # Otherwise, use the query directly
+        input_for_qa = context if context else query
+        
+        # Run the QA pipeline
+        result = orchestrator.run(input_for_qa)
+        
+        # Format the response
+        response = {
+            'answer': result.get('answer_text', ''),
+            'visuals': result.get('visuals'),
+            'sources': result.get('sources', []),
+            'verified': result.get('verified', False)
+        }
+        
+        return jsonify(response), 200
+        
+    except Exception as e:
+        traceback.print_exc()
+        return jsonify({'error': str(e)}), 500
 
 
 @app.route('/process', methods=['POST'])

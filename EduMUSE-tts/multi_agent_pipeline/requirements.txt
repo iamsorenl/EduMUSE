@@ -1,0 +1,14 @@
+crewai
+openai
+whisper
+pdfminer.six
+beautifulsoup4
+requests
+numpy
+gTTS
+torch
+torchaudio
+tortoise-tts
+elevenlabs
+pydub
+python-dotenv
