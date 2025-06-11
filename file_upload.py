@@ -1,13 +1,13 @@
 from flask import Flask, request, jsonify, send_from_directory
-from flask_cors import CORS
+from flask_cors import CORS, cross_origin
 import os
 from werkzeug.utils import secure_filename
 from datetime import datetime
 
 app = Flask(__name__)
 
-# Configure CORS to allow all origins and credentials
-CORS(app, resources={r"/*": {"origins": "*", "supports_credentials": True}})
+# Configure CORS - we'll use a simpler approach with just the CORS extension
+CORS(app)
 
 # Configure upload folder
 UPLOAD_FOLDER = 'uploads'
@@ -49,6 +49,7 @@ def upload_document():
 
 # Remove @cross_origin() decorators since we're using global CORS
 @app.route('/files/<filename>')
+@cross_origin()
 def serve_file(filename):
     """Serve uploaded PDF files"""
     try:
@@ -57,6 +58,7 @@ def serve_file(filename):
         return jsonify({'error': f'File not found: {str(e)}'}), 404
 
 @app.route('/files', methods=['GET'])
+@cross_origin()
 def list_files():
     """List all uploaded PDF files"""
     try:
