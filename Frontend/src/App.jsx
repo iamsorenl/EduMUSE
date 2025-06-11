@@ -37,7 +37,6 @@ function App() {
   const [results, setResults] = useState([]);
   // State to manage loading status
   const [isLoading, setIsLoading] = useState(false);
-  const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
   // Handler for selecting a file from the file list
@@ -81,7 +80,7 @@ function App() {
   // Find the existing handleAction function and REPLACE it with this one:
 
   const handleAction = async (action, content, isPdf = false) => {
-    setLoading(true);
+    setIsLoading(true);
     setError(null);
     console.log(`Performing ${action} on text: ${content.substring(0, 80)}`);
 
@@ -137,7 +136,7 @@ function App() {
       console.error("Error calling API:", error);
       setError(error.message);
     } finally {
-      setLoading(false);
+      setIsLoading(false);
     }
   };
 
