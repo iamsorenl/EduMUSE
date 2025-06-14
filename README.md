@@ -333,3 +333,14 @@ Example from recent run:
   "metadata": { "source_count": 1, "flows_executed": ["quiz", "summary"] }
 }
 ```
+
+
+Curl Commands for file_upload.py:
+
+curl -X POST -H "Content-Type: application/json" \
+-d '{"action": "summarize", "filename": "AttentionIsAllYouNeed.pdf"}' \
+http://localhost:5000/process
+
+curl -X POST -H "Content-Type: application/json" \
+-d '{"action": "assess", "filename": "AttentionIsAllYouNeed.pdf"}' \
+http://localhost:5000/process
