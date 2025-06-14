@@ -1,8 +1,10 @@
 import os
 import re
+import datetime
+import subprocess
+import glob  # Add this import
+from dotenv import load_dotenv
 from openai import OpenAI
-
-client = OpenAI(api_key=os.getenv("OPENAI_API_KEY", ""))
 import requests
 
 from bs4 import BeautifulSoup
@@ -11,8 +13,6 @@ from typing import Any, Dict, List, Optional
 
 # pdfminer imports
 from pdfminer.high_level import extract_text
-
-# Make sure OPENAI_API_KEY is set in your environment
 
 
 class InputDetectionAgent:
@@ -398,14 +398,67 @@ class FormattingAgent:
         context["formatted_response"] = formatted
         return context
 
-#TODO: need to figure this
-class TTSAgent:
 
+class TTSAgent:
     def __init__(self):
         pass
 
     def __call__(self, context: Dict[str, Any]) -> Dict[str, Any]:
-        # Always call example.py and pass the input file as an argument
+        print("🎵 TTSAgent: Starting audio generation...")
+        
         user_input = context.get('user_input', '')
-        os.system('python3 "' + os.path.join(os.path.dirname(__file__), 'example.py') + '" "' + str(user_input) + '"')
+        script_path = os.path.join(os.path.dirname(__file__), 'example.py')
+        
+        print(f"🎵 TTSAgent: Executing example.py with input: {user_input}")
+        print(f"🎵 TTSAgent: Script path: {script_path}")
+        
+        try:
+            # Use subprocess with real-time output and longer timeout
+            process = subprocess.Popen(
+                ["python", script_path, str(user_input)], 
+                stdout=subprocess.PIPE, 
+                stderr=subprocess.STDOUT,
+                universal_newlines=True,
+                bufsize=1
+            )
+            
+            # Print output in real-time with timeout
+            import time
+            start_time = time.time()
+            timeout_seconds = 600  # 10 minutes instead of 5
+            
+            while True:
+                output = process.stdout.readline()
+                if output == '' and process.poll() is not None:
+                    break
+                if output:
+                    print(f"🎵 example.py: {output.strip()}")
+                
+                # Check for timeout
+                if time.time() - start_time > timeout_seconds:
+                    print(f"❌ TTSAgent: Process timed out after {timeout_seconds/60} minutes!")
+                    process.terminate()
+                    process.wait()
+                    return context
+            
+            return_code = process.poll()
+            print(f"🎵 TTSAgent: Process completed with return code: {return_code}")
+            
+            if return_code == 0:
+                print("🎵 TTSAgent: Looking for generated podcast files...")
+                podcast_files = glob.glob("dialogue_podcast_*.mp3")
+                print(f"🎵 TTSAgent: Found files: {podcast_files}")
+                
+                if podcast_files:
+                    latest_file = max(podcast_files, key=os.path.getctime)
+                    print(f"🎵 TTSAgent: Using: {latest_file}")
+                    context["audio_output"] = latest_file
+                else:
+                    print("❌ TTSAgent: No podcast file generated")
+            else:
+                print(f"❌ TTSAgent: Script failed with code {return_code}")
+                
+        except Exception as e:
+            print(f"❌ TTSAgent: Exception occurred: {e}")
+            
         return context

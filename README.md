@@ -10,6 +10,6 @@ ELEVENLABS_API_KEY
 cd multi_agent_pipeline  
 source .venv/bin/activate  
 pip install -r requirements.txt  
-python -i "path/to/pdf/document" --tts  
+python main.py -i "path/to/pdf/document" --tts  
 
-
+python main.py -i "../uploads/CrewAI.pdf" --tts
