@@ -38,6 +38,10 @@ function App() {
   // State to manage loading status
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
+  
+  // State for QA Chat
+  const [chatMessages, setChatMessages] = useState([]);
+  const [isChatLoading, setIsChatLoading] = useState(false);
 
   // Handler for selecting a file from the file list
   const handleFileSelect = (file) => {
@@ -74,6 +78,74 @@ function App() {
   const handleDeleteResult = (resultId) => {
     setResults(prev => prev.filter(result => result.id !== resultId));
     console.log('Individual AI result deleted:', resultId);
+  };
+  
+  // Handler for clearing chat history
+  const handleClearChat = () => {
+    setChatMessages([]);
+    console.log('Chat history cleared');
+  };
+  
+  // Handler for sending a chat message
+  const handleSendChatMessage = async (message) => {
+    // Add user message to chat
+    const userMessage = {
+      id: Date.now(),
+      content: message,
+      sender: 'user',
+      timestamp: Date.now()
+    };
+    
+    setChatMessages(prev => [...prev, userMessage]);
+    setIsChatLoading(true);
+    
+    try {
+      // Call the QA pipeline API
+      console.log("Sending QA request:", { 
+        query: message,
+        context: selectedFile ? selectedFile.filename : null
+      });
+      
+      const response = await fetch('http://127.0.0.1:5000/qa', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          query: message,
+          context: selectedFile ? selectedFile.filename : null
+        }),
+      });
+      
+      const responseData = await response.json();
+      console.log("QA raw response:", responseData);
+      
+      if (!response.ok) {
+        throw new Error(responseData.error || `HTTP error! status: ${response.status}`);
+      }
+      
+      // Add AI response to chat
+      const aiMessage = {
+        id: Date.now() + 1,
+        content: responseData.answer || "I couldn't find an answer to that question.",
+        sender: 'ai',
+        timestamp: Date.now()
+      };
+      
+      setChatMessages(prev => [...prev, aiMessage]);
+    } catch (error) {
+      console.error("Error calling QA API:", error);
+      
+      // Add error message to chat
+      const errorMessage = {
+        id: Date.now() + 1,
+        content: `Error: ${error.message}`,
+        sender: 'ai',
+        timestamp: Date.now()
+      };
+      
+      setChatMessages(prev => [...prev, errorMessage]);
+    } finally {
+      setIsChatLoading(false);
+    }
   };
 
   // Updated handler for performing an action - now accepts text parameter
@@ -174,9 +246,16 @@ function App() {
               </Paper>
             </Grid>
 
-            {/* Right sidebar - Results */}
+            {/* Right sidebar - Results - FIXED: Enforce strict height */}
             <Grid size={3}>
-              <Paper sx={{ height: '100%', p: 2 }}> {/* Paper component for styling */}
+              <Paper sx={{ 
+                height: '100%', 
+                maxHeight: 'calc(100vh - 132px)', // ← ADD: Enforce maximum height
+                p: 2,
+                display: 'flex',
+                flexDirection: 'column',
+                overflow: 'hidden' // Prevent the paper from expanding
+              }}>
                 <ResultsPanel 
                   results={results} // Pass results array
                   isLoading={isLoading} // Pass loading state
@@ -185,6 +264,10 @@ function App() {
                   onClearAllResults={handleClearAllResults} // Pass clear all results handler
                   onDeleteResult={handleDeleteResult} // Pass delete individual result handler
                   onClearHighlights={handleClearHighlights} // Pass clear highlights handler - NEW
+                  chatMessages={chatMessages} // Pass chat messages
+                  onSendChatMessage={handleSendChatMessage} // Pass send chat message handler
+                  isChatLoading={isChatLoading} // Pass chat loading state
+                  onClearChat={handleClearChat} // Pass clear chat handler
                 />
               </Paper>
             </Grid>
