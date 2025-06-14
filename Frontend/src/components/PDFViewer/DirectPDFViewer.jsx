@@ -209,7 +209,42 @@ export default function DirectPDFViewer({
         backgroundColor: '#f5f5f5'
       }}>
         <Typography variant="h6" color="text.secondary">
-          Select a PDF file to view
+          Select a file to view
+        </Typography>
+      </Box>
+    );
+  }
+  
+  // Handle non-PDF files (like podcasts)
+  if (file.type === 'podcast') {
+    return (
+      <Box sx={{ 
+        height: '100%', 
+        display: 'flex', 
+        alignItems: 'center', 
+        justifyContent: 'center',
+        flexDirection: 'column',
+        border: '1px solid #ddd',
+        borderRadius: 1,
+        backgroundColor: '#f5f5f5',
+        p: 3
+      }}>
+        <Typography variant="h5" color="primary" gutterBottom>
+          🎧 Podcast Audio File
+        </Typography>
+        <Typography variant="body1" sx={{ mb: 3, textAlign: 'center' }}>
+          {file.filename.split('/').pop().replace('.mp3', '').replace(/_/g, ' ')}
+        </Typography>
+        
+        <Box sx={{ width: '100%', maxWidth: 500, mb: 3 }}>
+          <audio controls style={{ width: '100%' }}>
+            <source src={`http://127.0.0.1:5000/files/${file.filename}`} type="audio/mpeg" />
+            Your browser does not support the audio element.
+          </audio>
+        </Box>
+        
+        <Typography variant="body2" color="text.secondary" sx={{ textAlign: 'center' }}>
+          This is a podcast generated from a PDF document. You can listen to it directly in the browser.
         </Typography>
       </Box>
     );

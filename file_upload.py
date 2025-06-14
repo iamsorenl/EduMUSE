@@ -16,6 +16,7 @@ from edumuse.flows.llm_knowledge_flow import LLMKnowledgeFlow
 from edumuse.flows.hybrid_retrieval_flow import HybridRetrievalFlow
 from edumuse.flows.assessment_flow import AssessmentFlow
 from edumuse.flows.summary_flow import SummaryFlow
+from edumuse.flows.podcast_flow import PodcastFlow
 
 # Import QA pipeline components
 qa_pipeline_path = os.path.join(os.path.dirname(__file__), 'EduMUSE-ishika-qa-pipeline', 'multi_agent_pipeline')
@@ -35,6 +36,8 @@ UPLOAD_FOLDER = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'upload
 
 if not os.path.exists(UPLOAD_FOLDER):
     os.makedirs(UPLOAD_FOLDER)
+
+# No longer creating a podcasts subdirectory - all files go directly in uploads
 
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 app.config['MAX_CONTENT_LENGTH'] = 50 * 1024 * 1024
@@ -70,21 +73,37 @@ def upload_document():
         }), 200
     return jsonify({'error': 'Invalid file type.'}), 400
 
-@app.route('/files/<filename>')
+@app.route('/files/<path:filename>')
 @cross_origin()
 def serve_file(filename):
-    """Serves a specific file from the uploads folder."""
-    return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
+    """Serves a specific file from the uploads folder, including subdirectories."""
+    # Check if the file is in a subdirectory
+    if '/' in filename:
+        directory, file = filename.rsplit('/', 1)
+        return send_from_directory(os.path.join(app.config['UPLOAD_FOLDER'], directory), file)
+    else:
+        return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
 
 @app.route('/files', methods=['GET'])
 @cross_origin()
 def list_files():
-    """Lists all PDF files in the uploads folder."""
+    """Lists all PDF and MP3 files in the uploads folder."""
     try:
         files = []
+        # List PDF and MP3 files in the main uploads folder
         for filename in os.listdir(app.config['UPLOAD_FOLDER']):
             if filename.lower().endswith('.pdf'):
-                files.append({'filename': filename})
+                files.append({'filename': filename, 'type': 'pdf'})
+            elif filename.lower().endswith('.mp3'):
+                files.append({'filename': filename, 'type': 'podcast'})
+        
+        # Also check the legacy podcasts subfolder for backward compatibility
+        podcast_folder = os.path.join(app.config['UPLOAD_FOLDER'], 'podcasts')
+        if os.path.exists(podcast_folder):
+            for filename in os.listdir(podcast_folder):
+                if filename.lower().endswith('.mp3'):
+                    files.append({'filename': f'podcasts/{filename}', 'type': 'podcast'})
+        
         return jsonify({'files': files}), 200
     except Exception as e:
         return jsonify({'error': str(e)}), 500
@@ -191,7 +210,8 @@ def process_text():
             'explain': 'llm_knowledge',
             'analyze': 'hybrid_retrieval',
             'summarize': 'summary',
-            'assess': 'assessment'
+            'assess': 'assessment',
+            'podcast': 'podcast'
         }
         flow = flow_mapping.get(action)
         if not flow:
@@ -235,6 +255,81 @@ def process_text():
     except Exception as e:
         traceback.print_exc()
         return jsonify({'error': str(e)}), 500
+
+# Add this test function to your file_upload.py temporarily to debug
+@app.route('/test-pdf', methods=['GET'])
+@cross_origin()
+def test_pdf_generation():
+    try:
+        pdf_generator = PDFGenerator(upload_folder=app.config['UPLOAD_FOLDER'])
+        
+        # Test summary PDF
+        summary_test_data = {
+            'sources_found': 'This is a test summary content for PDF generation. It should create a simple PDF with this text.',
+            'topic': 'Test Summary Topic'
+        }
+        
+        summary_result = pdf_generator.generate_summary_pdf(summary_test_data)
+        
+        # Test assessment PDF
+        assessment_test_data = {
+            'sources_found': '''1. What is machine learning?
+A) A type of computer
+B) A method of teaching computers to learn from data
+C) A programming language
+D) A database system
+
+Answer: B) A method of teaching computers to learn from data
+
+2. Explain the difference between supervised and unsupervised learning.
+
+Answer: Supervised learning uses labeled training data, while unsupervised learning finds patterns in unlabeled data.''',
+            'topic': 'Test Assessment Topic'
+        }
+        
+        assessment_result = pdf_generator.generate_assessment_pdfs(assessment_test_data)
+        
+        return jsonify({
+            'summary_result': summary_result,
+            'assessment_result': assessment_result,
+            'status': 'success'
+        }), 200
+        
+    except Exception as e:
+        print(f"PDF test error: {e}")
+        traceback.print_exc()
+        return jsonify({'error': str(e), 'trace': traceback.format_exc()}), 500
+
+@app.route('/test-podcast', methods=['GET'])
+@cross_origin()
+def test_podcast_generation():
+    try:
+        # Test the podcast flow directly
+        from edumuse.flows.podcast_flow import PodcastFlow
+        
+        podcast_flow = PodcastFlow()
+        
+        test_sources = [{
+            'content': 'Machine learning is a subset of artificial intelligence that enables computers to learn and make decisions from data without being explicitly programmed.',
+            'title': 'ML Introduction'
+        }]
+        
+        test_context = {
+            'topic': 'Introduction to Machine Learning',
+            'user_level': 'intermediate'
+        }
+        
+        result = podcast_flow.process(test_sources, test_context)
+        
+        return jsonify({
+            'result': result,
+            'status': 'success'
+        }), 200
+        
+    except Exception as e:
+        print(f"Podcast test error: {e}")
+        traceback.print_exc()
+        return jsonify({'error': str(e), 'trace': traceback.format_exc()}), 500
 
 if __name__ == '__main__':
     app.run(debug=True, port=5000, host='127.0.0.1')

@@ -17,7 +17,7 @@ import {
   MenuItem,
   ListItemSecondaryAction
 } from '@mui/material';
-import { PictureAsPdf, Refresh, MoreVert, Summarize, Quiz } from '@mui/icons-material';
+import { PictureAsPdf, Refresh, MoreVert, Summarize, Quiz, Podcasts, MusicNote } from '@mui/icons-material';
 import FileUpload from './FileUpload';
 
 export default function FileList({ onFileSelect, selectedFile, onAction, isLoading }) {
@@ -160,6 +160,8 @@ export default function FileList({ onFileSelect, selectedFile, onAction, isLoadi
               <ListItemIcon>
                 {isLoading && processingFile === file.filename ? (
                   <CircularProgress size={20} color="primary" />
+                ) : file.type === 'podcast' ? (
+                  <MusicNote color="primary" />
                 ) : (
                   <PictureAsPdf color="error" />
                 )}
@@ -186,24 +188,39 @@ export default function FileList({ onFileSelect, selectedFile, onAction, isLoadi
           open={Boolean(anchorEl)}
           onClose={handleActionMenuClose}
         >
-          <MenuItem onClick={() => handleActionSelect('summarize')}>
-            <ListItemIcon>
-              <Summarize fontSize="small" />
-            </ListItemIcon>
-            <ListItemText primary="Generate Summary" />
-          </MenuItem>
-          <MenuItem onClick={() => handleActionSelect('assess')}>
-            <ListItemIcon>
-              <Quiz fontSize="small" />
-            </ListItemIcon>
-            <ListItemText primary="Generate Assessment" />
-          </MenuItem>
+          {/* Conditionally render menu items based on file type */}
+          {selectedActionFile && selectedActionFile.type === 'pdf' ? [
+            // PDF file actions
+            <MenuItem key="summarize" onClick={() => handleActionSelect('summarize')}>
+              <ListItemIcon>
+                <Summarize fontSize="small" />
+              </ListItemIcon>
+              <ListItemText primary="Generate Summary" />
+            </MenuItem>,
+            <MenuItem key="assess" onClick={() => handleActionSelect('assess')}>
+              <ListItemIcon>
+                <Quiz fontSize="small" />
+              </ListItemIcon>
+              <ListItemText primary="Generate Assessment" />
+            </MenuItem>,
+            <MenuItem key="podcast" onClick={() => handleActionSelect('podcast')}>
+              <ListItemIcon>
+                <Podcasts fontSize="small" />
+              </ListItemIcon>
+              <ListItemText primary="Generate Podcast" />
+            </MenuItem>
+          ] : selectedActionFile && selectedActionFile.type === 'podcast' ? [
+            // Podcast file actions (none available)
+            <MenuItem key="no-actions" disabled>
+              <ListItemText primary="No actions available for podcasts" />
+            </MenuItem>
+          ] : null}
         </Menu>
       </List>
 
       {files.length === 0 && (
         <Typography variant="body2" color="text.secondary" sx={{ p: 2, textAlign: 'center' }}>
-          No PDF files found. Upload a PDF to get started.
+          No files found. Upload a PDF to get started.
         </Typography>
       )}
 

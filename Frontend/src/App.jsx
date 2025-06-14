@@ -49,6 +49,25 @@ function App() {
     setHighlights([]); // Clear highlights when a new file is selected
     setResults([]); // Clear all results
     setSelectedText(''); // Clear selected text
+    
+    // If it's a podcast file, add it to the results
+    if (file.type === 'podcast') {
+      const podcastResult = {
+        id: Date.now(),
+        type: 'podcast',
+        topic: file.filename.split('/').pop().replace('.mp3', '').replace(/_/g, ' '),
+        data: {
+          flow_type: 'podcast',
+          audio_output: file.filename,
+          metadata: {
+            duration_seconds: 0 // We don't know the duration
+          }
+        },
+        text: file.filename,
+        timestamp: Date.now()
+      };
+      setResults([podcastResult]);
+    }
   };
 
   // Handler for selecting text in the PDF viewer
@@ -162,7 +181,8 @@ function App() {
       'explain': 'llm_knowledge',
       'analyze': 'hybrid_retrieval',
       'summarize': 'summary',
-      'assess': 'assessment'
+      'assess': 'assessment',
+      'podcast': 'podcast'
     };
 
     const payload = isPdf ? { filename: content, action } : { text: content, action };

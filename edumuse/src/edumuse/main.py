@@ -12,6 +12,7 @@ from flows.llm_knowledge_flow import LLMKnowledgeFlow
 from flows.hybrid_retrieval_flow import HybridRetrievalFlow
 from flows.assessment_flow import AssessmentFlow
 from flows.summary_flow import SummaryFlow
+from flows.podcast_flow import PodcastFlow
 
 warnings.filterwarnings("ignore", category=SyntaxWarning, module="pysbd")
 

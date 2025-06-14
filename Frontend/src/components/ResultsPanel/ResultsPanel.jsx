@@ -90,6 +90,54 @@ const formatResult = (data) => {
           </Box>
         )}
         
+        {/* Podcast Generation */}
+        {data.flow_type === 'podcast' && (
+          data.error ? (
+            <Box sx={{ mt: 2, p: 2, bgcolor: 'error.light', borderRadius: 1, border: '1px solid', borderColor: 'error.main' }}>
+              <Typography variant="subtitle2" color="error.dark" gutterBottom sx={{ display: 'flex', alignItems: 'center' }}>
+                ❌ Podcast Generation Failed
+              </Typography>
+              <Typography variant="body2" color="error.dark" sx={{ fontSize: '0.85rem' }}>
+                Error: {data.error}
+              </Typography>
+              <Typography variant="caption" color="error.dark" sx={{ display: 'block', mt: 1 }}>
+                Please check the server logs for more details.
+              </Typography>
+            </Box>
+          ) : data.audio_output ? (
+            <Box sx={{ mt: 2, p: 2, bgcolor: 'info.light', borderRadius: 1, border: '1px solid', borderColor: 'info.main' }}>
+              <Typography variant="subtitle2" color="info.dark" gutterBottom sx={{ display: 'flex', alignItems: 'center' }}>
+                🎧 Podcast Generated Successfully
+              </Typography>
+              <Typography variant="body2" color="info.dark" sx={{ fontSize: '0.85rem' }}>
+                • Audio File: <code>{data.audio_output.split('/').pop()}</code><br/>
+                • Duration: {data.metadata?.duration_seconds ? `${Math.round(data.metadata.duration_seconds)} seconds` : 'Unknown'}
+              </Typography>
+              <Box sx={{ mt: 1 }}>
+                <audio controls style={{ width: '100%' }}>
+                  <source src={`http://127.0.0.1:5000/files/podcasts/${data.audio_output.split('/').pop()}`} type="audio/mpeg" />
+                  Your browser does not support the audio element.
+                </audio>
+              </Box>
+              <Typography variant="caption" color="info.dark" sx={{ display: 'block', mt: 1 }}>
+                📁 Audio file saved to uploads folder - check the file list to download
+              </Typography>
+            </Box>
+          ) : (
+            <Box sx={{ mt: 2, p: 2, bgcolor: 'warning.light', borderRadius: 1, border: '1px solid', borderColor: 'warning.main' }}>
+              <Typography variant="subtitle2" color="warning.dark" gutterBottom sx={{ display: 'flex', alignItems: 'center' }}>
+                ⚠️ Podcast Generation Issue
+              </Typography>
+              <Typography variant="body2" color="warning.dark" sx={{ fontSize: '0.85rem' }}>
+                The podcast dialogue was generated, but the audio file could not be created.
+              </Typography>
+              <Typography variant="caption" color="warning.dark" sx={{ display: 'block', mt: 1 }}>
+                Please check the server logs for more details.
+              </Typography>
+            </Box>
+          )
+        )}
+        
         {/* General PDF success for other flows */}
         {data.pdf_generated && data.flow_type !== 'assessment' && (
           <Box sx={{ mt: 1, p: 1, bgcolor: 'info.light', borderRadius: 1 }}>
@@ -120,6 +168,7 @@ const ResultCard = ({ result, onDelete, index }) => {
       case 'explain': return 'primary';
       case 'analyze': return 'secondary';
       case 'highlight': return 'warning';
+      case 'podcast': return 'success';
       default: return 'default';
     }
   };
@@ -130,6 +179,7 @@ const ResultCard = ({ result, onDelete, index }) => {
       case 'explain': return '🧠';
       case 'analyze': return '⚡';
       case 'highlight': return '💡';
+      case 'podcast': return '🎧';
       default: return '🤖';
     }
   };
