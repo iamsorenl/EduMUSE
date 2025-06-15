@@ -9,3 +9,8 @@ This project implements a multi-agent question-answering pipeline using Crew AI.
    python3 -m venv venv
    source venv/bin/activate
    pip install -r requirements.txt
+   ```
+
+try this:
+
+python main.py -i "AttentionIsAllYouNeed.pdf" --tts
