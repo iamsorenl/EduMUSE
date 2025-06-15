@@ -407,5 +407,5 @@ class TTSAgent:
     def __call__(self, context: Dict[str, Any]) -> Dict[str, Any]:
         # Always call example.py and pass the input file as an argument
         user_input = context.get('user_input', '')
-        os.system('python3 "' + os.path.join(os.path.dirname(__file__), 'example.py') + '" "' + str(user_input) + '"')
+        os.system('python "' + os.path.join(os.path.dirname(__file__), 'example.py') + '" "' + str(user_input) + '"')
         return context
